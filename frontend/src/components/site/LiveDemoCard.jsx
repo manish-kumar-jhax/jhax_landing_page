@@ -67,43 +67,60 @@ const responses = [
   },
 ];
 
-const useTypewriter = (list) => {
-  const [i, setI] = useState(0);
+const useTypewriter = (list, index) => {
   const [text, setText] = useState("");
-  const [phase, setPhase] = useState("typing"); // typing | pausing | deleting
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const current = list[i];
-    let delay = 55;
-    if (phase === "pausing") delay = 1800;
-    if (phase === "deleting") delay = 22;
-
-    const t = setTimeout(() => {
-      if (phase === "typing") {
-        if (text.length < current.length) {
-          setText(current.slice(0, text.length + 1));
-        } else {
-          setPhase("pausing");
-        }
-      } else if (phase === "pausing") {
-        setPhase("deleting");
-      } else if (phase === "deleting") {
-        if (text.length > 0) {
-          setText(current.slice(0, text.length - 1));
-        } else {
-          setPhase("typing");
-          setI((i + 1) % list.length);
-        }
+    // Reset on index change
+    setText("");
+    setDone(false);
+    const current = list[index] || "";
+    let cancelled = false;
+    let i = 0;
+    const step = () => {
+      if (cancelled) return;
+      if (i < current.length) {
+        i += 1;
+        setText(current.slice(0, i));
+        setTimeout(step, 45);
+      } else {
+        setDone(true);
       }
-    }, delay);
-    return () => clearTimeout(t);
-  }, [text, phase, i, list]);
+    };
+    const initial = setTimeout(step, 120);
+    return () => {
+      cancelled = true;
+      clearTimeout(initial);
+    };
+  }, [index, list]);
 
-  return { text, index: i };
+  return { text, done };
+};
+
+const useCountdown = (seconds, onZero) => {
+  const [remaining, setRemaining] = useState(seconds);
+  useEffect(() => {
+    const tick = setInterval(() => {
+      setRemaining((r) => {
+        if (r <= 1) {
+          onZero?.();
+          return seconds;
+        }
+        return r - 1;
+      });
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [seconds, onZero]);
+  return remaining;
 };
 
 const LiveDemoCard = () => {
-  const { text, index } = useTypewriter(questions);
+  const [index, setIndex] = useState(0);
+  const remaining = useCountdown(30, () =>
+    setIndex((i) => (i + 1) % questions.length),
+  );
+  const { text, done } = useTypewriter(questions, index);
   const response = responses[index % responses.length];
 
   return (
@@ -145,8 +162,8 @@ const LiveDemoCard = () => {
             <span className="text-ghost">·</span>
             <span>Reading Square data…</span>
           </div>
-          <div className="font-mono text-[10px] text-ghost uppercase tracking-[0.18em]">
-            Auto-refresh · 30s
+          <div className="font-mono text-[10px] text-ghost uppercase tracking-[0.18em]" data-testid="hero-demo-countdown">
+            Auto-refresh · <span className="text-orange" style={{ minWidth: 22, display: "inline-block", textAlign: "right" }}>{String(remaining).padStart(2, "0")}s</span>
           </div>
         </div>
 
@@ -160,8 +177,9 @@ const LiveDemoCard = () => {
             style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, letterSpacing: "-0.01em", minHeight: 34 }}
             data-testid="hero-demo-question"
           >
-            “{text}
-            <span className="caret" />”
+            &ldquo;{text}
+            {!done && <span className="caret" />}
+            {done && <span>&rdquo;</span>}
           </div>
         </div>
 
@@ -246,7 +264,7 @@ const LiveDemoCard = () => {
                   </div>
                 </div>
                 <div
-                  className="font-mono text-[10px] px-2 py-1 rounded-full"
+                  className={`font-mono text-[10px] px-2 py-1 rounded-full ${s.tag === "ACT" ? "act-pulse" : ""}`}
                   style={{
                     background: `${s.color}18`,
                     color: s.color,

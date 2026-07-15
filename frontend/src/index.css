@@ -224,11 +224,28 @@ a,
     animation: jhaxCaret 0.85s step-end infinite;
 }
 
+/* ACT badge pulse — subtle glow + scale */
+@keyframes actPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(232, 80, 10, 0.55);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(232, 80, 10, 0);
+        transform: scale(1.05);
+    }
+}
+.act-pulse {
+    animation: actPulse 1.6s ease-in-out infinite;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .marquee-track,
     .dot-pulse,
-    .caret {
+    .caret,
+    .act-pulse {
         animation: none !important;
     }
     * {
