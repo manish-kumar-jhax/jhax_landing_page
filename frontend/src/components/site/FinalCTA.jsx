@@ -111,6 +111,7 @@ const FinalCTA = () => {
 
         <form
           onSubmit={submit}
+          noValidate
           data-testid="lead-form"
           className="mt-10 mx-auto flex flex-col sm:flex-row gap-3 max-w-[560px]"
         >
