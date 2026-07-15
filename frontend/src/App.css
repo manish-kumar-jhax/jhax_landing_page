@@ -1,0 +1,8 @@
+/* Page-level app styles kept minimal; main design system lives in index.css */
+.App {
+    background: var(--jhax-black);
+    color: var(--jhax-cream);
+    min-height: 100vh;
+    position: relative;
+    z-index: 0;
+}
