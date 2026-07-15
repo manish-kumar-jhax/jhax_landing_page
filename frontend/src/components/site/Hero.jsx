@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import LiveDemoCard from "@/components/site/LiveDemoCard";
 
@@ -6,15 +6,13 @@ import LiveDemoCard from "@/components/site/LiveDemoCard";
  * Signature on-load moment:
  *  - Line-by-line masked reveal for the two headline lines
  *  - Staggered fade-up for badge, sub, CTA
- *  - Subtle parallax on the demo card as you scroll
+ *  - Live Demo Card sits inline (right column desktop / below on mobile)
+ *    so it is visible above the fold without scrolling.
  */
-const line1 = "Stop guessing.";
-const line2 = "Start running.";
-
 const wordStagger = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.25 },
+    transition: { staggerChildren: 0.06, delayChildren: 0.2 },
   },
 };
 
@@ -33,15 +31,14 @@ const Hero = () => {
     offset: ["start start", "end start"],
   });
   const glowY = useTransform(scrollYProgress, [0, 1], [0, -140]);
-  const cardY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const cardScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
+  const cardY = useTransform(scrollYProgress, [0, 1], [0, 60]);
 
   return (
     <section
       id="top"
       ref={heroRef}
       data-testid="hero-section"
-      className="relative pt-[120px] pb-24 md:pt-[160px] md:pb-32 px-6 md:px-10"
+      className="relative pt-[104px] pb-16 md:pt-[112px] md:pb-24 px-6 md:px-10 min-h-screen"
     >
       {/* Ambient orange glow (parallax) */}
       <motion.div
@@ -50,10 +47,10 @@ const Hero = () => {
         className="absolute inset-0 pointer-events-none"
       >
         <div
-          className="absolute left-1/2 top-40 -translate-x-1/2 w-[900px] h-[900px] rounded-full blur-3xl opacity-70"
+          className="absolute right-[-10%] top-20 w-[900px] h-[900px] rounded-full blur-3xl opacity-60"
           style={{
             background:
-              "radial-gradient(closest-side, rgba(232,80,10,0.18), transparent)",
+              "radial-gradient(closest-side, rgba(232,80,10,0.20), transparent)",
           }}
         />
       </motion.div>
@@ -70,130 +67,131 @@ const Hero = () => {
         }}
       />
 
-      <div className="relative max-w-[1180px] mx-auto text-center">
-        {/* Live badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="inline-flex items-center gap-2 rounded-full font-mono text-[11px] tracking-[0.14em] uppercase"
-          style={{
-            background: "rgba(232,80,10,0.08)",
-            border: "1px solid rgba(232,80,10,0.25)",
-            color: "#FF6B2B",
-            padding: "8px 16px",
-          }}
-          data-testid="hero-live-badge"
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full dot-pulse"
-            style={{ background: "#E8500A" }}
-          />
-          LIVE · Connected to Square POS · Restaurant AI COO
-        </motion.div>
-
-        {/* Headline — masked line reveal */}
-        <motion.h1
-          variants={wordStagger}
-          initial="hidden"
-          animate="visible"
-          data-testid="hero-headline"
-          className="hero-headline mt-8 text-cream"
-          style={{
-            fontSize: "clamp(52px, 10vw, 128px)",
-          }}
-        >
-          <div className="mask-line block">
-            <motion.span variants={wordItem} className="inline-block">
-              {line1}
-            </motion.span>
-          </div>
-          <div className="mask-line block">
-            <motion.span
-              variants={wordItem}
-              className="inline-block"
-              style={{ color: "#F5F2ED" }}
-            >
-              Start{" "}
-              <span style={{ color: "#E8500A" }}>running</span>.
-            </motion.span>
-          </div>
-        </motion.h1>
-
-        {/* Sub */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.9 }}
-          data-testid="hero-subheadline"
-          className="mt-7 mx-auto text-muted-warm"
-          style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 300,
-            fontSize: "clamp(17px, 1.6vw, 22px)",
-            lineHeight: 1.55,
-            maxWidth: 640,
-          }}
-        >
-          JHAX watches your restaurant 24/7. It finds what&apos;s costing you money,
-          tells you why, and fixes it — before your next service.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.05 }}
-          className="mt-10 flex flex-col items-center gap-4"
-        >
-          <a
-            href="#book-demo"
-            data-testid="hero-cta-book-demo"
-            className="inline-flex items-center gap-2"
+      <div className="relative max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr),minmax(0,600px)] gap-10 lg:gap-14 items-center">
+        {/* Left column — copy */}
+        <div className="text-left">
+          {/* Live badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="inline-flex items-center gap-2 rounded-full font-mono text-[11px] tracking-[0.14em] uppercase"
             style={{
-              background: "#E8500A",
-              color: "#fff",
-              padding: "18px 42px",
-              borderRadius: 100,
-              fontSize: 17,
-              fontWeight: 600,
-              letterSpacing: "-0.01em",
-              boxShadow: "0 20px 60px -20px rgba(232,80,10,0.6)",
-              transition: "transform .2s ease, box-shadow .2s ease",
+              background: "rgba(232,80,10,0.08)",
+              border: "1px solid rgba(232,80,10,0.25)",
+              color: "#FF6B2B",
+              padding: "8px 14px",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 28px 72px -20px rgba(232,80,10,0.8)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 20px 60px -20px rgba(232,80,10,0.6)";
+            data-testid="hero-live-badge"
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full dot-pulse"
+              style={{ background: "#E8500A" }}
+            />
+            LIVE · Connected to Square POS
+          </motion.div>
+
+          {/* Headline — masked line reveal */}
+          <motion.h1
+            variants={wordStagger}
+            initial="hidden"
+            animate="visible"
+            data-testid="hero-headline"
+            className="hero-headline mt-5 text-cream"
+            style={{
+              fontSize: "clamp(48px, 7.5vw, 96px)",
             }}
           >
-            Book My Free Demo <span aria-hidden>→</span>
-          </a>
-          <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ghost">
+            <div className="mask-line block">
+              <motion.span variants={wordItem} className="inline-block">
+                Stop guessing.
+              </motion.span>
+            </div>
+            <div className="mask-line block">
+              <motion.span variants={wordItem} className="inline-block">
+                Start <span style={{ color: "#E8500A" }}>running</span>.
+              </motion.span>
+            </div>
+          </motion.h1>
+
+          {/* Sub */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.75 }}
+            data-testid="hero-subheadline"
+            className="mt-5 text-muted-warm"
+            style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 300,
+              fontSize: "clamp(16px, 1.4vw, 20px)",
+              lineHeight: 1.55,
+              maxWidth: 560,
+            }}
+          >
+            JHAX watches your restaurant 24/7. It finds what&apos;s costing you money,
+            tells you why, and fixes it — before your next service.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            className="mt-7 flex flex-wrap items-center gap-4"
+          >
+            <a
+              href="#book-demo"
+              data-testid="hero-cta-book-demo"
+              className="inline-flex items-center gap-2"
+              style={{
+                background: "#E8500A",
+                color: "#fff",
+                padding: "16px 34px",
+                borderRadius: 100,
+                fontSize: 16,
+                fontWeight: 600,
+                letterSpacing: "-0.01em",
+                boxShadow: "0 20px 60px -20px rgba(232,80,10,0.6)",
+                transition: "transform .2s ease, box-shadow .2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 28px 72px -20px rgba(232,80,10,0.8)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 20px 60px -20px rgba(232,80,10,0.6)";
+              }}
+            >
+              Book My Free Demo <span aria-hidden>→</span>
+            </a>
+            <a
+              href="#problem"
+              data-testid="hero-secondary-link"
+              className="text-muted-warm hover:text-cream transition-colors text-sm"
+            >
+              See how it works ↓
+            </a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.1 }}
+            className="mt-4 font-mono text-[11px] uppercase tracking-[0.18em] text-ghost"
+          >
             No credit card · No commitment · Takes 2 minutes
-          </div>
-          <a
-            href="#problem"
-            data-testid="hero-secondary-link"
-            className="mt-2 text-muted-warm hover:text-cream transition-colors text-sm"
-          >
-            See how it works ↓
-          </a>
+          </motion.div>
+        </div>
+
+        {/* Right column — Live Demo Card */}
+        <motion.div style={{ y: cardY }} className="relative">
+          <LiveDemoCard />
         </motion.div>
       </div>
-
-      {/* Live demo card with parallax */}
-      <motion.div
-        style={{ y: cardY, scale: cardScale }}
-        className="relative max-w-[1180px] mx-auto mt-16 md:mt-24 px-0 md:px-4"
-      >
-        <LiveDemoCard />
-      </motion.div>
     </section>
   );
 };
