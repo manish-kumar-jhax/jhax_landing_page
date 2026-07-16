@@ -7,53 +7,45 @@ import PhoneSimulator from "@/components/site/PhoneSwipeDemo";
 const PROOFS = [
   {
     icon: Plug,
-    title: "Square is live",
+    title: "This is connected to Square right now",
     body: (
       <>
-        POS connected in real time. Every order, cover, tip and repeat-customer
-        signal is read directly from Square — no exports, no spreadsheets. That
-        is why the panel reads{" "}
-        <span className="text-cream">19 orders · 14 unique customers</span>{" "}
-        without a human touching a keyboard.
+        <span className="text-cream">$398</span> isn&apos;t a demo figure — it&apos;s
+        what this restaurant made today. JHAX reads it the moment a customer
+        pays. No exports. No spreadsheets. No waiting.
       </>
     ),
   },
   {
     icon: Armchair,
-    title: "RevPASH $0.41",
+    title: "$0.41 — the number Square never shows you",
     body: (
       <>
-        Revenue per available seat per hour — the single hardest restaurant KPI
-        to calculate. Most POS dashboards never show it. JHAX auto-computes it
-        every 30 seconds from the same Square data.
+        It means this restaurant earns{" "}
+        <span className="text-cream">41 cents</span> per empty seat per hour.
+        The best restaurants make <span className="text-cream">80 cents</span>.
+        JHAX tells you exactly how to close that gap.
       </>
     ),
   },
   {
     icon: Search,
-    title: "Why $398 is down",
+    title: "$398 is down — JHAX already knows the reason",
     body: (
       <>
-        Revenue is <span className="text-cream">–38.8%</span> vs yesterday, but
-        traffic held —{" "}
-        <span className="text-cream">14 unique customers</span> and{" "}
-        <span className="text-cream">68% repeat rate</span>. Not a traffic
-        problem, a retention problem. JHAX has already flagged the 3 dormant
-        VIPs to reactivate before dinner service.
+        It&apos;s not fewer people coming in. 63 regulars from last month just
+        haven&apos;t been back yet. JHAX found this in{" "}
+        <span className="text-cream">60 seconds</span> and has the fix ready.
       </>
     ),
   },
   {
     icon: Mic,
-    title: "The orange mic button",
+    title: "That orange button lets you talk to your restaurant",
     body: (
       <>
-        Voice-first AI COO. Press the dot, ask{" "}
-        <em className="text-cream" style={{ fontStyle: "italic" }}>
-          &ldquo;why is Tuesday slow?&rdquo;
-        </em>
-        , and get a 60-second, root-cause answer while walking the floor.
-        Answers are read out loud so the operator&apos;s hands stay free.
+        Press it and ask anything. Get an answer out loud — while you&apos;re
+        cooking, serving, or running between tables. No typing needed.
       </>
     ),
   },
@@ -71,9 +63,9 @@ const RealRestaurantProof = () => {
         label="The Proof"
         headline={
           <>
-            Not a mockup.
+            Not made up.
             <br />
-            Not a demo account.
+            Not a practice account.
             <br />
             <span className="text-orange">A real restaurant. Today.</span>
           </>

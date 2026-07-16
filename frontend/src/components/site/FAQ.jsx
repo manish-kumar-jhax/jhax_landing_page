@@ -5,36 +5,36 @@ import ChapterHeader from "@/components/site/ChapterHeader";
 
 const faqs = [
   {
-    q: "We already use Square. Does JHAX replace it?",
-    a: "No — JHAX connects to your Square account and makes it smarter. Your POS stays exactly as it is. JHAX sits on top and adds the AI intelligence layer your Square dashboard doesn't have.",
+    q: "We already use Square. Do we have to switch?",
+    a: "No — you keep Square exactly as it is. JHAX connects to your Square and makes it smarter. Think of Square as the cash register and JHAX as the business brain sitting on top. Setup takes about 15 minutes.",
   },
   {
-    q: "How long does setup take?",
-    a: "Most restaurants are live in under 15 minutes. Connect your Square account, and JHAX starts reading your data immediately. No hardware. No IT person needed.",
+    q: "Is this hard to use? I'm not a tech person.",
+    a: "If you can send a WhatsApp message, you can use JHAX. Just type or say a question — like 'why is money down today?' — and JHAX answers in plain English. No charts to figure out. No reports to build. No tech knowledge needed.",
   },
   {
     q: "What if I only have one location?",
-    a: "JHAX is built for 1–15 location independent operators. Single-location owners see the biggest immediate impact — especially on customer win-back and labor cost savings.",
-  },
-  {
-    q: "Do I need to know anything about AI or tech?",
-    a: "If you can send a WhatsApp message, you can use JHAX. The entire interface is plain English questions and answers. No dashboards to configure. No reports to build.",
+    a: "JHAX works just as well for one restaurant as it does for five. In fact, single-location owners usually see the biggest results fastest — because every answer goes directly into one place.",
   },
   {
     q: "How fast will I see results?",
-    a: "Most restaurant owners see their first actionable insight within 24 hours of connecting. Campaign ROI data shows within 48 hours of sending your first campaign.",
+    a: "Most restaurant owners get their first useful answer within 24 hours of connecting. Promotion results — how many people came back and how much they spent — show up within 48 hours of sending.",
   },
   {
-    q: "Is my customer data safe?",
-    a: "Yes. JHAX uses bank-grade encryption. Your data is never sold, never shared, and never used to train general AI models. It stays yours.",
+    q: "Is my customer information safe?",
+    a: "Yes. Your data is locked with bank-level security. We never sell it, never share it, and never use it for anything other than helping your specific restaurant. It's yours — always.",
   },
   {
-    q: "What does it cost?",
-    a: "Plans start at $299/month. Most restaurants save more than that in recovered revenue in their first week. Book a demo and we'll show you the math for your specific restaurant.",
+    q: "How much does it cost?",
+    a: "Plans start at $299 a month. Most restaurants make that back in the first week just from finding customers who haven't come back and fixing overstaffed shifts. Book a demo and we'll show you the math for your restaurant specifically.",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Yes. No contracts. No lock-in. Cancel with one click. We're confident enough in the product that we don't need to trap you.",
+    q: "Can I cancel if I don't like it?",
+    a: "Yes, anytime. No contracts. No penalty. One click and you're done. We're confident enough in what JHAX does that we don't need to lock you in.",
+  },
+  {
+    q: "Still have a question?",
+    a: "We'll answer it live on the demo call. Book a free 20-minute session and ask us anything — about the product, the price, how it works for your specific restaurant. No pressure.",
   },
 ];
 
@@ -47,9 +47,9 @@ const FAQ = () => {
         label="Common Questions"
         headline={
           <>
-            Real questions.
+            Things people
             <br />
-            <span className="text-orange">Straight answers.</span>
+            <span className="text-orange">always ask us.</span>
           </>
         }
       />

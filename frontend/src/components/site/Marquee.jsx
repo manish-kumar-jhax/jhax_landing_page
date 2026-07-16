@@ -7,12 +7,12 @@ import React from "react";
 const words = [
   "Your restaurant.",
   "On autopilot.",
-  "Root cause in 60 seconds.",
-  "Recovers $400+ per week.",
-  "Live on Square.",
-  "Built for operators.",
-  "1 to 15 locations.",
-  "Detect → Diagnose → Act → Measure.",
+  "Answers in 60 seconds.",
+  "Finds $400 a week.",
+  "Plugs into Square.",
+  "Built for restaurant owners.",
+  "1 restaurant. 15. Doesn't matter.",
+  "Spots it. Finds why. Fixes it. Shows the money back.",
 ];
 
 const Marquee = () => {

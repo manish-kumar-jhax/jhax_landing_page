@@ -12,7 +12,7 @@ const Footer = () => (
         <JhaxLogo size={22} markSize={26} />
       </div>
       <div className="text-muted-warm text-[14px] md:mx-auto text-center max-w-md">
-        Your AI COO. Built for restaurant operators who refuse to guess.
+        Your restaurant has a new boss. And it never sleeps.
       </div>
       <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-ghost">
         © 2026 JHAX.ai — All rights reserved

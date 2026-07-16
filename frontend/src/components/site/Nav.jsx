@@ -79,7 +79,7 @@ const Nav = () => {
               "0 8px 26px -10px rgba(232,80,10,0.6)";
           }}
         >
-          Book a Demo <span aria-hidden>→</span>
+          See It Live <span aria-hidden>→</span>
         </a>
       </div>
     </motion.header>

@@ -2,10 +2,10 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const stats = [
-  { v: "$82.7B", l: "Market by 2034" },
-  { v: "60 sec", l: "Answer time" },
-  { v: "$400+", l: "Weekly savings" },
-  { v: "1 app", l: "Replaces 6+ tools" },
+  { v: "$82.7B", l: "Size of the restaurant AI market by 2034" },
+  { v: "60 sec", l: "Time to get a full answer about your restaurant" },
+  { v: "$400+", l: "Found per restaurant every week on average" },
+  { v: "1 app", l: "Replaces 6+ things restaurant owners use every day" },
 ];
 
 const Stats = () => {

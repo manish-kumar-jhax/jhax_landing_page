@@ -37,9 +37,10 @@ const MorningScreen = () => (
         Good morning, Alex <span aria-hidden>☀️</span>
       </div>
       <div className="mt-2 text-[12.5px] leading-snug" style={{ color: "#6B6866" }}>
-        Yesterday closed at <span style={{ color: "#F5F2ED" }}>$2,847</span> ·{" "}
-        <span style={{ color: "#F5F2ED" }}>86 covers</span>. Best tip{" "}
-        <span style={{ color: "#F5F2ED" }}>22%</span>.
+        Yesterday your restaurant made{" "}
+        <span style={{ color: "#F5F2ED" }}>$2,847</span>. Here are{" "}
+        <span style={{ color: "#F5F2ED" }}>3 things</span> that need your
+        attention today.
       </div>
     </div>
 
@@ -47,12 +48,12 @@ const MorningScreen = () => (
       {[
         {
           i: AlertTriangle,
-          tag: "URGENT",
+          tag: "ACT TODAY",
           color: "#F87171",
           bg: "rgba(220,38,38,0.10)",
           bd: "rgba(220,38,38,0.35)",
-          title: "Cash short $87",
-          body: "Void #4712 · needs sign-off",
+          title: "63 of your regulars haven't been back this month",
+          body: "Reach out to bring them back before they leave",
         },
         {
           i: Clock,
@@ -60,8 +61,8 @@ const MorningScreen = () => (
           color: "#FF6B2B",
           bg: "rgba(232,80,10,0.12)",
           bd: "rgba(232,80,10,0.4)",
-          title: "Tue lunch overstaffed",
-          body: "Trim 1+1 · saves $142",
+          title: "Today is Tuesday — your slowest day",
+          body: "Here's how to make more money tonight",
         },
         {
           i: Sparkles,
@@ -69,8 +70,8 @@ const MorningScreen = () => (
           color: "#22C55E",
           bg: "rgba(22,163,74,0.10)",
           bd: "rgba(22,163,74,0.35)",
-          title: "3 VIPs · 21+ days away",
-          body: "LTV $3,030 · win-back ready",
+          title: "Your best money-maker is never in your promotions",
+          body: "BLT Sandwich · 72% margin · $1,083 this month",
         },
       ].map((c) => {
         const Icon = c.i;
@@ -109,7 +110,7 @@ const MorningScreen = () => (
       {[
         { l: "Health", v: "74", c: "#22C55E" },
         { l: "Recover", v: "$412", c: "#FF6B2B" },
-        { l: "Actions", v: "4", c: "#F5F2ED" },
+        { l: "To Do", v: "4", c: "#F5F2ED" },
       ].map((p) => (
         <div
           key={p.l}
@@ -137,14 +138,14 @@ const MorningScreen = () => (
 const DashboardScreen = () => {
   // Light theme, matches real product screenshot
   const KPIS = [
-    { l: "Total Revenue", v: "$398", d: "-38.8%", down: true },
-    { l: "Covers", v: "19", d: "-26.9%", down: true, sub: "19 orders today" },
-    { l: "Avg Order", v: "$21", sub: "basket size" },
-    { l: "Repeat", v: "68%", sub: "returning" },
+    { l: "Total Money", v: "$398", d: "-38.8%", down: true },
+    { l: "Tables served", v: "19", d: "-26.9%", down: true, sub: "19 orders today" },
+    { l: "Each spend", v: "$21", sub: "on average" },
+    { l: "Come back", v: "68%", sub: "returning" },
     { l: "Table Turn", v: "1.19×", sub: "turns/day" },
     { l: "RevPASH", v: "$0.41", sub: "seat · hour" },
     { l: "Tips", v: "$0", sub: "customer" },
-    { l: "Customers", v: "14", sub: "unique today" },
+    { l: "People", v: "14", sub: "today" },
   ];
   return (
     <div
@@ -268,7 +269,7 @@ const AskScreen = () => (
         className="flex items-center gap-2 font-mono uppercase tracking-[0.2em]"
         style={{ fontSize: 9.5, color: "#FF6B2B" }}
       >
-        <MessageCircle size={11} /> Ask anything · AI COO
+        <MessageCircle size={11} /> Ask JHAX anything
       </div>
       <div
         className="font-display mt-2"
@@ -291,7 +292,7 @@ const AskScreen = () => (
             fontSize: 13,
           }}
         >
-          Why is Tuesday slow?
+          Why is money down today?
         </div>
       </div>
       {/* AI bubble */}
@@ -308,15 +309,15 @@ const AskScreen = () => (
             className="font-mono uppercase tracking-[0.2em] mb-1"
             style={{ fontSize: 8.5, color: "#FF6B2B" }}
           >
-            AI COO · 60 sec answer
+            JHAX · 60 sec answer
           </div>
           <div className="text-[13px] leading-snug" style={{ color: "#F5F2ED" }}>
-            Not a traffic problem — a{" "}
-            <span style={{ color: "#FF6B2B" }}>retention problem</span>.
+            It&apos;s about your regulars{" "}
+            <span style={{ color: "#FF6B2B" }}>not coming back</span>.
           </div>
           <div className="text-[11.5px] mt-1.5" style={{ color: "#6B6866" }}>
-            63 VIPs haven&apos;t returned in 30 days. Reactivating 20% recovers{" "}
-            <span style={{ color: "#F5F2ED" }}>$368</span> this week.
+            63 regulars haven&apos;t been back in 30 days. Bring back 20% of
+            them and you get <span style={{ color: "#F5F2ED" }}>$368</span> this week.
           </div>
           <div className="mt-2 flex gap-1.5 flex-wrap">
             <span
@@ -329,7 +330,7 @@ const AskScreen = () => (
                 color: "#6B6866",
               }}
             >
-              VIPs 63
+              People 63
             </span>
             <span
               className="rounded-full font-mono"
@@ -341,7 +342,7 @@ const AskScreen = () => (
                 color: "#6B6866",
               }}
             >
-              Recover $368
+              Bring back $368
             </span>
           </div>
           <button
@@ -355,7 +356,7 @@ const AskScreen = () => (
               fontWeight: 500,
             }}
           >
-            Launch win-back <ArrowRight size={10} />
+            Send the message <ArrowRight size={10} />
           </button>
         </div>
       </div>
@@ -369,7 +370,7 @@ const AskScreen = () => (
           Try one
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {["Who tipped best?", "Overstaffed this week?", "Best margin dish?"].map(
+          {["Who tipped best?", "Too many staff this week?", "Best money-making dish?"].map(
             (q) => (
               <span
                 key={q}

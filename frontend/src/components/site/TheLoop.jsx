@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import ChapterHeader from "@/components/site/ChapterHeader";
 
 const STAGES = [
-  { k: "DETECT", d: "Spots the problem before you do" },
-  { k: "DIAGNOSE", d: "Tells you exactly why" },
-  { k: "ACT", d: "Recommends the fix" },
-  { k: "DEPLOY", d: "Executes it with one tap" },
-  { k: "MEASURE", d: "Shows what it recovered" },
+  { k: "SPOTS IT", d: "Finds the problem before you do" },
+  { k: "FINDS OUT WHY", d: "Tells you why in plain English" },
+  { k: "FIXES IT", d: "One tap to launch the fix" },
+  { k: "SENDS IT", d: "Your message goes out automatically" },
+  { k: "SHOWS WHAT CAME BACK", d: "You see the money that came back" },
 ];
 
 const STEP_MS = 1400;
@@ -55,9 +55,10 @@ const TheLoop = () => {
         label="Your Competitive Advantage"
         headline={
           <>
-            The only restaurant AI
+            Every other app tells you
             <br />
-            <span className="text-orange">that completes the full loop.</span>
+            <span className="text-muted-warm">what went wrong.</span>{" "}
+            <span className="text-orange">JHAX fixes it.</span>
           </>
         }
       />
@@ -297,25 +298,23 @@ const TheLoop = () => {
             data-testid="loop-callout"
           >
             <div className="font-mono text-[10px] uppercase text-orange tracking-[0.24em] mb-2">
-              The moat
+              The difference
             </div>
             <p
               className="text-cream font-display"
               style={{
-                fontSize: "clamp(22px, 3vw, 32px)",
+                fontSize: "clamp(18px, 2.2vw, 26px)",
                 letterSpacing: "-0.02em",
-                lineHeight: 1.15,
+                lineHeight: 1.3,
               }}
             >
               <em style={{ fontStyle: "italic", color: "#6B6866" }}>
-                Every competitor stops at
+                Square, Toast, and every other POS
               </em>{" "}
-              DIAGNOSE.
-              <br />
-              <em style={{ fontStyle: "italic", color: "#6B6866" }}>
-                JHAX goes all the way to
-              </em>{" "}
-              <span className="text-orange">MEASURE.</span>
+              show you what went wrong. Then they stop.{" "}
+              <span className="text-orange">JHAX goes all the way</span> — it
+              finds the problem, explains it, fixes it, and shows you the money
+              that came back.
             </p>
           </motion.div>
         </div>

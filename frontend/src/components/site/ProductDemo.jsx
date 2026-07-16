@@ -25,9 +25,9 @@ const TABS = [
 // ---------- DASHBOARD ----------
 const DashboardTab = () => {
   const kpis = [
-    { label: "Total Revenue", value: "$398", delta: "-38.8%", down: true },
-    { label: "Covers", value: "19", delta: "-26.9%", down: true },
-    { label: "Avg Order Value", value: "$21", delta: "-4.1%", down: true },
+    { label: "Total Money", value: "$398", delta: "-38.8%", down: true },
+    { label: "Tables served", value: "19", delta: "-26.9%", down: true },
+    { label: "Each spend", value: "$21", delta: "-4.1%", down: true },
     {
       label: "Health Score",
       value: "51/100",
@@ -36,14 +36,14 @@ const DashboardTab = () => {
     },
   ];
   const health = [
-    { l: "Revenue growth", v: 7 },
-    { l: "Repeat customers", v: 100 },
-    { l: "Labor efficiency", v: 82 },
+    { l: "Money growth", v: 7 },
+    { l: "People coming back", v: 100 },
+    { l: "Staff efficiency", v: 82 },
   ];
   const quickAsks = [
-    "Why are sales down?",
-    "Who are my VIPs?",
-    "Am I overstaffed?",
+    "Why is money down?",
+    "Who are my regulars?",
+    "Do I have too many staff?",
   ];
   return (
     <div className="grid gap-5">
@@ -171,20 +171,20 @@ const DashboardTab = () => {
         style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
       >
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange mb-2">
-          AI COO · Live diagnosis
+          JHAX · Live answer
         </div>
         <div
           className="text-cream text-[18px] md:text-[22px] font-display"
           style={{ letterSpacing: "-0.02em" }}
         >
-          Revenue is down 38.8% — not a traffic problem, a
-          <span className="text-orange"> retention problem</span>.
+          Money is down 38.8% — it&apos;s not fewer people coming in, it&apos;s{" "}
+          <span className="text-orange"> your regulars stopped coming back</span>.
         </div>
         <div className="text-muted-warm mt-2 text-[15px] leading-relaxed">
           63 of your best customers haven&apos;t returned in 30 days.
-          Reactivating 20% recovers ~
-          <span className="text-cream">$368</span> this week. One tap deploys the
-          win-back campaign to WhatsApp + SMS.
+          Bringing back 20% of them recovers ~
+          <span className="text-cream">$368</span> this week. One tap sends the
+          win-back message to WhatsApp + SMS.
         </div>
       </div>
     </div>
@@ -193,9 +193,9 @@ const DashboardTab = () => {
 
 // ---------- ASK ANYTHING ----------
 const askQuestions = [
-  "Why are my sales down 38.8% today?",
-  "Which of my 3 branches needs attention?",
-  "Am I overstaffed this Tuesday lunch?",
+  "Why is money down 38.8% today?",
+  "Which of my 3 restaurants needs my help?",
+  "Do I have too many staff Tuesday lunch?",
   "Who are my top 20 customers this month?",
 ];
 const AskAnythingTab = () => {
@@ -248,7 +248,7 @@ const AskAnythingTab = () => {
             <Mic size={16} color="#FF6B2B" />
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-ghost">
-            Operator asks
+            Owner asks
           </div>
         </div>
         <div
@@ -267,7 +267,7 @@ const AskAnythingTab = () => {
       >
         <div className="flex items-center justify-between mb-2">
           <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-            AI COO · Decision
+            JHAX · Answer
           </div>
           <div
             className="font-mono text-[10px] px-2 py-0.5 rounded-full act-pulse"
@@ -284,22 +284,22 @@ const AskAnythingTab = () => {
           className="text-cream font-display"
           style={{ fontSize: 26, letterSpacing: "-0.02em", lineHeight: 1.1 }}
         >
-          Retention problem, not traffic.
+          It&apos;s about your regulars, not new people.
         </div>
         <div
           className="font-mono text-[11px] mt-1"
           style={{ color: "#16A34A" }}
         >
-          [+$368/wk recoverable]
+          [+$368 this week if we bring them back]
         </div>
         <p className="text-muted-warm mt-3 text-[15px] leading-relaxed">
-          63 of your best customers haven&apos;t returned in 30 days. Reactivating
-          20% recovers ~<span className="text-cream">$368</span> this week. One
-          tap deploys the win-back campaign to WhatsApp + SMS.
+          63 of your best customers haven&apos;t returned in 30 days. Bringing
+          back 20% of them recovers ~<span className="text-cream">$368</span>{" "}
+          this week. One tap sends the message on WhatsApp + SMS.
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
           {[
-            ["At-risk", "63"],
+            ["Not back", "63"],
             ["Est. recovery", "$368"],
             ["Response time", "60 sec"],
           ].map(([l, v]) => (
@@ -322,7 +322,7 @@ const AskAnythingTab = () => {
             padding: "10px 20px",
           }}
         >
-          Launch Win-Back Campaign <ArrowRight size={14} />
+          Launch Win-Back <ArrowRight size={14} />
         </button>
       </div>
     </div>
@@ -333,9 +333,9 @@ const AskAnythingTab = () => {
 const CustomersTab = () => {
   const stats = [
     { l: "Total Customers", v: "100", c: "#F5F2ED" },
-    { l: "VIPs", v: "37", c: "#16A34A" },
-    { l: "At-Risk", v: "10", c: "#DC2626" },
-    { l: "Repeat Rate", v: "68%", c: "#F5F2ED" },
+    { l: "Regulars", v: "37", c: "#16A34A" },
+    { l: "Not back", v: "10", c: "#DC2626" },
+    { l: "Come-back Rate", v: "68%", c: "#F5F2ED" },
   ];
   const vips = [
     { n: "Quinn Reyes", v: "$1,141", visits: "9 visits" },
@@ -370,14 +370,14 @@ const CustomersTab = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* VIPs */}
+        {/* Top regulars */}
         <div
           className="rounded-xl p-5"
           style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-              Top VIPs
+              Top regulars
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ghost">
               This month
@@ -416,17 +416,17 @@ const CustomersTab = () => {
           </ul>
         </div>
 
-        {/* At-Risk */}
+        {/* At-Risk — haven't come back */}
         <div
           className="rounded-xl p-5"
           style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.24em]" style={{ color: "#DC2626" }}>
-              At-Risk
+              Not back yet
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ghost">
-              Haven&apos;t returned
+              Last visit
             </div>
           </div>
           <ul className="space-y-3">
@@ -470,7 +470,7 @@ const CustomersTab = () => {
               padding: "10px 20px",
             }}
           >
-            Send Win-Back <ArrowRight size={14} />
+            Send the message to those customers <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -614,7 +614,7 @@ const MenuTab = () => {
             padding: "10px 20px",
           }}
         >
-          Generate Combo <ArrowRight size={14} />
+          Build a deal <ArrowRight size={14} />
         </button>
       </div>
     </div>
@@ -624,9 +624,9 @@ const MenuTab = () => {
 // ---------- MARKETING AI ----------
 const MarketingTab = () => {
   const goals = [
-    "Reactivate inactive customers",
+    "Bring back customers who stopped coming",
     "Fill Tuesday lunch",
-    "Push high-margin combo",
+    "Push high-margin deal",
     "Promote new menu item",
   ];
   const [goal, setGoal] = useState(0);
@@ -637,7 +637,7 @@ const MarketingTab = () => {
         style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
       >
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange mb-3">
-          Campaign Generator · Goal
+          Promotion Builder · Goal
         </div>
         <div className="flex flex-wrap gap-2">
           {goals.map((g, i) => (
@@ -722,7 +722,7 @@ const MarketingTab = () => {
       >
         <div className="flex items-center justify-between mb-2">
           <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-            Campaign ROI
+            Money made vs money spent
           </div>
           <div
             className="font-mono text-[10px] px-2 py-0.5 rounded-full"
@@ -739,8 +739,8 @@ const MarketingTab = () => {
           className="text-cream font-display"
           style={{ fontSize: 26, letterSpacing: "-0.02em", lineHeight: 1.15 }}
         >
-          Last campaign recovered
-          <span className="text-orange"> $340 in 48 hours</span> — 8 customers returned.
+          Last promotion made
+          <span className="text-orange"> $340 in 48 hours</span> — 8 people came back.
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
           {[
@@ -767,9 +767,9 @@ const MarketingTab = () => {
 // ---------- LABOR ----------
 const LaborTab = () => {
   const metrics = [
-    { l: "Labor Cost %", v: "38%", sub: "Target 30%", c: "#DC2626", bad: true },
+    { l: "Staff cost %", v: "38%", sub: "Target 30%", c: "#DC2626", bad: true },
     { l: "Overtime Hours", v: "14 hrs", sub: "This week", c: "#DC2626", bad: true },
-    { l: "Revenue per Staff", v: "$43/hr", sub: "Above avg", c: "#22C55E", bad: false },
+    { l: "Money per Staff", v: "$43/hr", sub: "Above avg", c: "#22C55E", bad: false },
   ];
   const shifts = [
     { name: "Tue Lunch — Kitchen", staff: "3 cooks", need: "2", waste: "$142" },
@@ -861,7 +861,7 @@ const LaborTab = () => {
             padding: "10px 20px",
           }}
         >
-          Adjust This Week&apos;s Schedule <ArrowRight size={14} />
+          Adjust the schedule <ArrowRight size={14} />
         </button>
       </div>
     </div>
@@ -902,11 +902,9 @@ const ProductDemo = () => {
         label="The Product"
         headline={
           <>
-            Everything happening
+            Everything your restaurant needs.
             <br />
-            in your restaurant.
-            <br />
-            <span className="text-orange">One screen.</span>
+            <span className="text-orange">Finally in one place.</span>
           </>
         }
       />

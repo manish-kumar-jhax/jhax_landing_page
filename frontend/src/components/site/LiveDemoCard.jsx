@@ -20,79 +20,79 @@ const TABS = [
 const ITEMS = [
   {
     tab: "customers",
-    question: "Who are my top 20 customers by revenue this month?",
-    headline: "Top 20 = 34% of monthly revenue",
-    delta: "3 VIPs at risk",
+    question: "Who are my top 20 customers this month?",
+    headline: "Top 20 = 34% of your money",
+    delta: "3 regulars slipping",
     body: (
       <>
         Sarah M. leads at <strong className="text-cream">$412</strong> across 7 visits.
-        3 of your top 20 haven&apos;t returned in 21 days — flag them for win-back
-        before they slip.
+        3 of your top 20 haven&apos;t been back in 21 days — reach out before
+        they slip.
       </>
     ),
     stats: [
-      { label: "VIPs", value: "20" },
-      { label: "Revenue share", value: "34%" },
-      { label: "At-risk", value: "3" },
+      { label: "Regulars", value: "20" },
+      { label: "Share of money", value: "34%" },
+      { label: "Not back", value: "3" },
     ],
-    cta: "Send VIP Win-Back",
+    cta: "Send the message to those customers",
   },
   {
     tab: "menu",
-    question: "What is my highest-margin dish this week?",
+    question: "What dish makes me the most money this week?",
     headline: "Wagyu Sliders: 68% margin",
-    delta: "$1,412 contribution",
+    delta: "$1,412 earned",
     body: (
       <>
         Sold <strong className="text-cream">47 units</strong>, contributed{" "}
         <strong className="text-cream">$1,412</strong>. Only appears on 12% of
-        orders — under-promoted. Bundle into a combo to lift attach rate.
+        orders — hardly anyone knows about it. Bundle into a deal to sell more.
       </>
     ),
     stats: [
       { label: "Margin", value: "68%" },
-      { label: "Units", value: "47" },
-      { label: "Revenue", value: "$1,412" },
+      { label: "Sold", value: "47" },
+      { label: "Money", value: "$1,412" },
     ],
-    cta: "Promote in Combo",
+    cta: "Build a deal",
   },
   {
     tab: "labor",
-    question: "Am I overstaffed on Tuesday lunch?",
-    headline: "Tue 11–2 is 42% overstaffed",
+    question: "Do I have too many staff on Tuesday lunch?",
+    headline: "Tue 11–2 has too many staff",
     delta: "–$340 / week",
     body: (
       <>
-        Historical demand is <strong className="text-cream">42% below</strong>{" "}
-        your current schedule. Trimming 1 cook + 1 server saves{" "}
-        <strong className="text-cream">$17,680/yr</strong> with zero service impact.
+        You have <strong className="text-cream">42% more staff</strong> than the
+        Tuesday lunch actually needs. Trim 1 cook + 1 server saves{" "}
+        <strong className="text-cream">$17,680/yr</strong> with zero impact on service.
       </>
     ),
     stats: [
-      { label: "Overstaff", value: "42%" },
-      { label: "Weekly loss", value: "$340" },
-      { label: "Annual save", value: "$17,680" },
+      { label: "Overstaffed", value: "42%" },
+      { label: "Every week", value: "$340" },
+      { label: "Every year", value: "$17,680" },
     ],
-    cta: "Adjust Schedule",
+    cta: "Fix the schedule",
   },
   {
     tab: "marketing",
-    question: "Which campaign brought back the most revenue?",
-    headline: "WhatsApp win-back — Nov 12",
-    delta: "18.4x ROI",
+    question: "Which offer brought back the most money?",
+    headline: "WhatsApp offer — Nov 12",
+    delta: "$2,214 back",
     body: (
       <>
-        Recovered <strong className="text-cream">$2,214</strong> from{" "}
-        <strong className="text-cream">47 customers</strong> in 5 days. Cost $120.
-        Winner — re-run next Tuesday against 63 new dormant customers.
+        Brought back <strong className="text-cream">$2,214</strong> from{" "}
+        <strong className="text-cream">47 people</strong> in 5 days. Cost $120.
+        Winner — send it again next Tuesday to 63 people who stopped coming.
       </>
     ),
     stats: [
-      { label: "Recovered", value: "$2,214" },
-      { label: "ROI", value: "18.4x" },
-      { label: "Customers", value: "47" },
+      { label: "Money back", value: "$2,214" },
+      { label: "For every $1", value: "$18.40" },
+      { label: "People", value: "47" },
     ],
-    cta: "Re-run Campaign",
+    cta: "Send it again",
   },
 ];
 
@@ -186,9 +186,9 @@ const LiveDemoCard = () => {
               className="w-1.5 h-1.5 rounded-full dot-pulse"
               style={{ background: "#E8500A" }}
             />
-            <span className="text-orange">JHAX AI COO</span>
+            <span className="text-orange">JHAX</span>
             <span className="text-ghost">·</span>
-            <span>LIVE · Reading Square</span>
+            <span>Watching a real restaurant · Live</span>
           </div>
           <div
             className="font-mono text-[10px] uppercase tracking-[0.16em] text-ghost"
@@ -286,7 +286,7 @@ const LiveDemoCard = () => {
           >
             <div className="flex items-center justify-between mb-2 gap-3">
               <div className="font-mono text-[9.5px] uppercase text-orange tracking-[0.24em]">
-                AI COO · Decision
+                JHAX · Answer
               </div>
               <div
                 className="font-mono text-[10px] px-2 py-0.5 rounded-full act-pulse"

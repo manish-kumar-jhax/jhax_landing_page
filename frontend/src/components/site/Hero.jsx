@@ -88,7 +88,7 @@ const Hero = () => {
               className="w-1.5 h-1.5 rounded-full dot-pulse"
               style={{ background: "#E8500A" }}
             />
-            LIVE · Connected to Square POS
+            LIVE · Watching a real restaurant right now
           </motion.div>
 
           {/* Headline — masked line reveal */}
@@ -104,12 +104,12 @@ const Hero = () => {
           >
             <div className="mask-line block">
               <motion.span variants={wordItem} className="inline-block">
-                Stop guessing.
+                Your restaurant
               </motion.span>
             </div>
             <div className="mask-line block">
               <motion.span variants={wordItem} className="inline-block">
-                Start <span style={{ color: "#E8500A" }}>running</span>.
+                has a <span style={{ color: "#E8500A" }}>new boss</span>.
               </motion.span>
             </div>
           </motion.h1>
@@ -129,8 +129,9 @@ const Hero = () => {
               maxWidth: 560,
             }}
           >
-            JHAX watches your restaurant 24/7. It finds what&apos;s costing you money,
-            tells you why, and fixes it — before your next service.
+            JHAX watches your restaurant every hour, every day. When something
+            goes wrong — it tells you what, why, and exactly how to fix it.
+            Before you even notice the problem.
           </motion.p>
 
           {/* CTAs */}
@@ -166,7 +167,7 @@ const Hero = () => {
                   "0 20px 60px -20px rgba(232,80,10,0.6)";
               }}
             >
-              Book My Free Demo <span aria-hidden>→</span>
+              Show Me How It Works <span aria-hidden>→</span>
             </a>
             <a
               href="#problem"

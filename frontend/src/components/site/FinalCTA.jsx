@@ -105,8 +105,8 @@ const FinalCTA = () => {
             lineHeight: 1.6,
           }}
         >
-          Book a free 20-minute demo. We&apos;ll show JHAX live on a real restaurant —
-          then show you what it would find in yours.
+          Book a free 20-minute call. We&apos;ll show JHAX working on a real
+          restaurant — then tell you what it would find in yours.
         </p>
 
         <form
@@ -161,7 +161,7 @@ const FinalCTA = () => {
               e.currentTarget.style.boxShadow = "0 20px 60px -20px rgba(232,80,10,0.6)";
             }}
           >
-            {status === "loading" ? "Booking…" : "Book My Demo"}
+            {status === "loading" ? "Booking…" : "Show Me"}
             <span aria-hidden>→</span>
           </button>
         </form>
@@ -188,7 +188,7 @@ const FinalCTA = () => {
         )}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-warm">
-          {["No credit card", "No commitment", "Live product demo", "Takes 2 minutes"].map((t) => (
+          {["No credit card", "No commitment", "See a real restaurant live", "20 minutes"].map((t) => (
             <span key={t} className="inline-flex items-center gap-2">
               <span style={{ color: "#E8500A" }}>✓</span> {t}
             </span>

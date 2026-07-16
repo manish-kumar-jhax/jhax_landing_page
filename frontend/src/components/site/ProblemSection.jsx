@@ -6,33 +6,33 @@ import ChapterHeader from "@/components/site/ChapterHeader";
 const PAIRS = [
   {
     cost: 486,
-    pain: "Sales are down. You open 6 different apps trying to find out why — and still don't know an hour later.",
-    fix: "Ask “why are sales down?” Get a root-cause answer in 60 seconds — with one action to take immediately.",
+    pain: "Money drops on Tuesday. You open 6 different apps trying to figure out why. An hour later — still no answer.",
+    fix: "Ask “why is money down?” Get the real answer in 60 seconds. Then fix it with one tap.",
   },
   {
     cost: 340,
-    pain: "Your accountant tells you labor was 12% too high. Three weeks after the fact. The money is already gone.",
-    fix: "Every Monday at 7am, JHAX tells you which shifts are over-budget this week — before the week starts.",
+    pain: "Your accountant calls three weeks later to say you paid staff too much. That money is already spent.",
+    fix: "Every Monday morning, JHAX tells you exactly where you're spending too much — before the week starts.",
   },
   {
     cost: 412,
-    pain: "Your best customer hasn't been back in 45 days. You never noticed. They found somewhere else.",
-    fix: "JHAX flags at-risk customers automatically and launches a win-back campaign before they're gone.",
+    pain: "Your best customer — the one who came every week — stopped coming 45 days ago. You had no idea.",
+    fix: "JHAX notices when a regular stops coming and reaches out to them automatically before they leave for good.",
   },
   {
     cost: 180,
-    pain: "Building a promotion takes 2 hours across Instagram, WhatsApp, and your POS. By the time it's live, the slow period is over.",
-    fix: "Campaign ready, banner designed, combo offer built — in under 2 minutes. All from one screen.",
+    pain: "Making a promotion takes 2 hours across 3 different apps. By the time it's ready, the slow hour is over.",
+    fix: "Under 2 minutes — message written, picture made, offer ready. All from one screen. No switching apps.",
   },
   {
     cost: 327,
-    pain: "You ran a campaign last Tuesday. You have no idea if it worked. There's no way to know.",
-    fix: "See exactly how many customers came back and how much revenue your last campaign recovered.",
+    pain: "You sent out an offer last Tuesday. You have no idea if anyone came because of it. You'll never know.",
+    fix: "See exactly how many people came back and how much money your promotion made. Every single time.",
   },
   {
     cost: 694,
-    pain: "You're overstaffed on Tuesday lunch. Every week. Costing you $340. You just found out in this sentence.",
-    fix: "JHAX catches overstaffing every week. Estimated saving: $300–800 per location.",
+    pain: "You have too many staff working Tuesday lunch — every single week. That's $340 gone. Every week.",
+    fix: "JHAX catches overstaffing before it costs you. Average saving: $300–800 every single week.",
   },
 ];
 
@@ -270,9 +270,10 @@ const ProblemSection = () => {
         label="The Problem"
         headline={
           <>
-            Running a restaurant today
+            Every restaurant owner
             <br />
-            <span className="text-muted-warm">feels like this.</span>
+            <span className="text-muted-warm">is guessing.</span>{" "}
+            <span className="text-orange">Every day.</span>
           </>
         }
       />

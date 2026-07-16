@@ -21,7 +21,7 @@ const TrustStrip = () => {
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex flex-wrap items-center gap-x-10 gap-y-4">
         <div className="font-mono text-[11px] uppercase text-orange tracking-[0.24em]">
-          Integrates With
+          Plugs into
         </div>
 
         <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
@@ -65,7 +65,7 @@ const TrustStrip = () => {
             className="w-1.5 h-1.5 rounded-full dot-pulse"
             style={{ background: "#16A34A" }}
           />
-          1 restaurant live · Growing
+          1 restaurant using JHAX right now
         </div>
       </div>
     </section>

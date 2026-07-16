@@ -5,18 +5,18 @@ import ChapterHeader from "@/components/site/ChapterHeader";
 const steps = [
   {
     n: "01",
-    title: "JHAX connects to Square",
-    body: "Link your Square POS in minutes. JHAX starts reading your live sales, customers, menu, and labor data immediately. No manual entry. No spreadsheets. No setup calls.",
+    title: "Plug in your Square",
+    body: "Takes 15 minutes. JHAX connects to your Square and starts reading your sales, customers, and menu straight away. No extra hardware. No tech person needed. If you can log into Square, you're ready.",
   },
   {
     n: "02",
-    title: "AI detects and diagnoses",
-    body: "JHAX watches every metric 24/7. The moment something is wrong — sales drop, labor spikes, a VIP goes quiet — it tells you exactly what happened and precisely why. Before you even open your phone.",
+    title: "JHAX watches. You don't have to.",
+    body: "Every hour, JHAX checks your numbers. The second something goes wrong — money drops, a good customer disappears — it tells you exactly what happened and why. Before you even open the app.",
   },
   {
     n: "03",
-    title: "You approve. JHAX acts.",
-    body: "One tap launches the fix. Campaign sent. Banner live. Combo pushed to your POS. Then JHAX shows you exactly how much revenue came back within 48 hours.",
+    title: "One tap. Problem gone.",
+    body: "JHAX doesn't just tell you what's wrong — it fixes it. Tap once to send a message or update a schedule. Then it shows you how much money came back within 48 hours.",
   },
 ];
 
