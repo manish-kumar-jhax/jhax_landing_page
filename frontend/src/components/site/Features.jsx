@@ -118,7 +118,7 @@ const Features = () => {
       className="relative py-28 md:py-40"
     >
       <ChapterHeader
-        number="05"
+        number="06"
         label="What JHAX Does"
         headline={
           <>
