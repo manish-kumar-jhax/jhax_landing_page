@@ -6,6 +6,7 @@ import ProblemSection from "@/components/site/ProblemSection";
 import RealRestaurantProof from "@/components/site/RealRestaurantProof";
 import ProductDemo from "@/components/site/ProductDemo";
 import MorningBrief from "@/components/site/MorningBrief";
+import PhoneSwipeDemo from "@/components/site/PhoneSwipeDemo";
 import HowItWorks from "@/components/site/HowItWorks";
 import Features from "@/components/site/Features";
 import TheLoop from "@/components/site/TheLoop";
@@ -26,6 +27,7 @@ const Landing = () => {
         <RealRestaurantProof />
         <ProductDemo />
         <MorningBrief />
+        <PhoneSwipeDemo />
         <HowItWorks />
         <Features />
         <TheLoop />
