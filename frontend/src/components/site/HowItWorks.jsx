@@ -28,7 +28,7 @@ const HowItWorks = () => {
       className="relative py-28 md:py-40"
     >
       <ChapterHeader
-        number="05"
+        number="04"
         label="How it works"
         headline={
           <>

@@ -51,7 +51,7 @@ const TheLoop = () => {
   return (
     <section id="loop" data-testid="the-loop" className="relative py-28 md:py-40">
       <ChapterHeader
-        number="07"
+        number="06"
         label="Your Competitive Advantage"
         headline={
           <>

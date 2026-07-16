@@ -2,9 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import ChapterHeader from "@/components/site/ChapterHeader";
 import { Plug, Armchair, Search, Mic } from "lucide-react";
-
-const REAL_SCREENSHOT =
-  "https://customer-assets-v7afamib.emergentagent.net/job_full-page-preview-2/artifacts/zp4txbfj_WhatsApp%20Image%202026-07-14%20at%205.20.02%20PM.jpeg";
+import PhoneSimulator from "@/components/site/PhoneSwipeDemo";
 
 const PROOFS = [
   {
@@ -136,71 +134,8 @@ const RealRestaurantProof = () => {
             LIVE · SQUARE
           </motion.div>
 
-          {/* Landscape device frame — matches the actual light-theme dashboard aspect */}
-          <div
-            className="relative mx-auto"
-            style={{
-              width: "min(560px, 92vw)",
-              aspectRatio: "16 / 9.5",
-              borderRadius: 22,
-              background:
-                "linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)",
-              padding: 8,
-              boxShadow:
-                "0 40px 120px -30px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(232,80,10,0.22)",
-            }}
-          >
-            {/* Screen chrome bar */}
-            <div
-              className="relative w-full flex items-center gap-2 px-3"
-              style={{
-                height: 22,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                background: "#0a0a0a",
-              }}
-            >
-              <span className="w-2 h-2 rounded-full" style={{ background: "#242424" }} />
-              <span className="w-2 h-2 rounded-full" style={{ background: "#242424" }} />
-              <span className="w-2 h-2 rounded-full" style={{ background: "#242424" }} />
-              <span
-                className="ml-3 font-mono uppercase"
-                style={{
-                  fontSize: 9,
-                  letterSpacing: "0.16em",
-                  color: "#6B6866",
-                }}
-              >
-                jhax.ai · west village · today
-              </span>
-            </div>
-
-            {/* Screen */}
-            <div
-              className="relative w-full overflow-hidden"
-              style={{
-                height: "calc(100% - 22px)",
-                borderBottomLeftRadius: 20,
-                borderBottomRightRadius: 20,
-                background: "#F5F2ED",
-              }}
-            >
-              <img
-                src={REAL_SCREENSHOT}
-                alt="Real JHAX dashboard — light theme — Washington restaurant, Square live"
-                data-testid="proof-screenshot"
-                loading="lazy"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  display: "block",
-                  background: "#F5F2ED",
-                }}
-              />
-            </div>
-          </div>
+          {/* Pocket JHAX Simulator — swipeable phone with 3 real screens */}
+          <PhoneSimulator />
         </motion.div>
 
         {/* RIGHT — 4 proof points */}

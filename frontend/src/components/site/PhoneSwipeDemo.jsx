@@ -427,7 +427,7 @@ const AskScreen = () => (
 
 // ---------- main component ----------
 
-const PhoneSwipeDemo = () => {
+const PhoneSimulator = () => {
   const [index, setIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [dx, setDx] = useState(0);
@@ -522,67 +522,39 @@ const PhoneSwipeDemo = () => {
   };
 
   return (
-    <section
+    <div
       id="phone-swipe"
       data-testid="phone-swipe-section"
-      className="relative py-24 md:py-32"
+      className="relative flex flex-col items-center"
     >
-      <div className="max-w-[1180px] mx-auto px-6 md:px-10 text-center mb-10">
+      {/* Orange glow */}
+      <div className="relative">
         <div
-          className="inline-flex items-center gap-2 rounded-full font-mono uppercase tracking-[0.18em]"
+          aria-hidden
+          className="absolute inset-0 -z-10 pointer-events-none"
           style={{
-            background: "rgba(232,80,10,0.08)",
-            border: "1px solid rgba(232,80,10,0.25)",
-            color: "#FF6B2B",
-            padding: "6px 14px",
-            fontSize: 10.5,
+            filter: "blur(60px)",
+            background:
+              "radial-gradient(closest-side, rgba(232,80,10,0.45), transparent 70%)",
+            transform: "scale(1.15)",
+          }}
+        />
+
+        {/* Phone shell */}
+        <div
+          className="relative select-none"
+          style={{
+            width: "min(320px, 88vw)",
+            aspectRatio: "9 / 19",
+            borderRadius: 44,
+            background:
+              "linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)",
+            padding: 10,
+            boxShadow:
+              "0 40px 120px -30px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(232,80,10,0.22), inset 0 0 0 3px #0a0a0a",
+            touchAction: "pan-y",
           }}
         >
-          Pocket JHAX
-        </div>
-        <h2
-          className="font-display text-cream mt-5 mx-auto"
-          style={{
-            fontSize: "clamp(30px, 4.5vw, 56px)",
-            letterSpacing: "-0.035em",
-            lineHeight: 1.02,
-            maxWidth: 720,
-          }}
-        >
-          One phone. Three swipes.
-          <br />
-          <span className="text-muted-warm">Your whole restaurant.</span>
-        </h2>
-      </div>
-
-      <div className="max-w-[1180px] mx-auto px-6 md:px-10 flex flex-col items-center">
-        {/* Orange glow */}
-        <div className="relative">
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10 pointer-events-none"
-            style={{
-              filter: "blur(60px)",
-              background:
-                "radial-gradient(closest-side, rgba(232,80,10,0.45), transparent 70%)",
-              transform: "scale(1.15)",
-            }}
-          />
-
-          {/* Phone shell */}
-          <div
-            className="relative select-none"
-            style={{
-              width: "min(340px, 90vw)",
-              aspectRatio: "9 / 19",
-              borderRadius: 44,
-              background: "linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)",
-              padding: 10,
-              boxShadow:
-                "0 40px 120px -30px rgba(0,0,0,0.7), inset 0 0 0 1.5px rgba(232,80,10,0.22), inset 0 0 0 3px #0a0a0a",
-              touchAction: "pan-y",
-            }}
-          >
             {/* Screen area (viewport for the swipe track) */}
             <div
               ref={trackRef}
@@ -674,7 +646,6 @@ const PhoneSwipeDemo = () => {
               </div>
             </div>
           </div>
-        </div>
 
         {/* Progress dots */}
         <div
@@ -713,8 +684,8 @@ const PhoneSwipeDemo = () => {
           Swipe · Drag · Tap · Or wait — it auto-advances
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
-export default PhoneSwipeDemo;
+export default PhoneSimulator;
