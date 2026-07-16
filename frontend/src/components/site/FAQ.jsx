@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     q: "Is my customer information safe?",
-    a: "Yes. Your data is locked with bank-level security. We never sell it, never share it, and never use it for anything other than helping your specific restaurant. It's yours — always.",
+    a: "Yes. Your information is locked with bank-level security. We never sell it, never share it, and never use it for anything other than helping your specific restaurant. It's yours — always.",
   },
   {
     q: "How much does it cost?",

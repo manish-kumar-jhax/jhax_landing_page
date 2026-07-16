@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const TABS = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "dashboard", label: "Overview", icon: LayoutDashboard },
   { key: "ask", label: "Ask Anything", icon: MessageSquare },
   { key: "customers", label: "Customers", icon: Users },
   { key: "menu", label: "Menu", icon: Utensils },
@@ -1001,7 +1001,7 @@ const ProductDemo = () => {
         </motion.div>
 
         <div className="mt-6 flex flex-wrap justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.22em] text-ghost px-2">
-          <span>fig. 02 — live dashboard, west village · nov 24</span>
+          <span>fig. 02 — live screen, west village · nov 24</span>
           <span>frame 001 / 003</span>
         </div>
       </div>

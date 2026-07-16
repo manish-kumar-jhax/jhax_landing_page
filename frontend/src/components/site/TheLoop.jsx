@@ -309,7 +309,7 @@ const TheLoop = () => {
               }}
             >
               <em style={{ fontStyle: "italic", color: "#6B6866" }}>
-                Square, Toast, and every other POS
+                Square, Toast, and every other cash register
               </em>{" "}
               show you what went wrong. Then they stop.{" "}
               <span className="text-orange">JHAX goes all the way</span> — it

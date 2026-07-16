@@ -176,7 +176,7 @@ const DashboardScreen = () => {
             letterSpacing: "-0.03em",
           }}
         >
-          Live dashboard
+          Your numbers, right now
         </div>
       </div>
 
@@ -611,7 +611,7 @@ const PhoneSimulator = () => {
               >
                 {[
                   { key: "morning", label: "MORNING", Icon: Sun },
-                  { key: "dashboard", label: "DASHBOARD", Icon: BarChart3 },
+                  { key: "dashboard", label: "TODAY", Icon: BarChart3 },
                   { key: "ask", label: "ASK AI", Icon: MessageCircle },
                 ].map(({ key, label, Icon }, i) => {
                   const isActive = index === i;
