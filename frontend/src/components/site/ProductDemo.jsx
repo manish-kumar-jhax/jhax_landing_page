@@ -898,7 +898,7 @@ const ProductDemo = () => {
       className="relative py-28 md:py-40"
     >
       <ChapterHeader
-        number="02"
+        number="03"
         label="The Product"
         headline={
           <>

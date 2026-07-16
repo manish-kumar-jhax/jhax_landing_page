@@ -43,7 +43,7 @@ const FAQ = () => {
   return (
     <section id="faq" data-testid="faq-section" className="relative py-28 md:py-40">
       <ChapterHeader
-        number="06"
+        number="07"
         label="Common Questions"
         headline={
           <>

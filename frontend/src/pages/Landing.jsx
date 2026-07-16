@@ -3,6 +3,7 @@ import Nav from "@/components/site/Nav";
 import Hero from "@/components/site/Hero";
 import TrustStrip from "@/components/site/TrustStrip";
 import ProblemSection from "@/components/site/ProblemSection";
+import RealRestaurantProof from "@/components/site/RealRestaurantProof";
 import ProductDemo from "@/components/site/ProductDemo";
 import HowItWorks from "@/components/site/HowItWorks";
 import Features from "@/components/site/Features";
@@ -21,6 +22,7 @@ const Landing = () => {
         <Hero />
         <TrustStrip />
         <ProblemSection />
+        <RealRestaurantProof />
         <ProductDemo />
         <HowItWorks />
         <Features />
