@@ -1,6 +1,7 @@
 import React from "react";
 import Nav from "@/components/site/Nav";
 import Hero from "@/components/site/Hero";
+import FreeAudit from "@/components/site/FreeAudit";
 import TrustStrip from "@/components/site/TrustStrip";
 import ProblemSection from "@/components/site/ProblemSection";
 import RealRestaurantProof from "@/components/site/RealRestaurantProof";
@@ -20,6 +21,7 @@ const Landing = () => {
       <Nav />
       <main>
         <Hero />
+        <FreeAudit />
         <TrustStrip />
         <ProblemSection />
         <RealRestaurantProof />
