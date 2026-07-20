@@ -3,12 +3,15 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import math
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+
+from data_source import get_provider, PlaceNotFound, DataSourceError
 
 
 ROOT_DIR = Path(__file__).parent
@@ -91,6 +94,118 @@ async def list_leads():
         if isinstance(d.get('created_at'), str):
             d['created_at'] = datetime.fromisoformat(d['created_at'])
     return docs
+
+
+# ---------- Free Audit (Google Places) ----------
+class AuditRequest(BaseModel):
+    name: str
+    city: Optional[str] = ""
+
+
+# --- Heuristic metrics (ESTIMATES, not from the restaurant's POS) ---
+#
+# These are transparent rules-of-thumb derived only from the two public signals
+# Google gives us: star rating and review count. They are returned under an
+# `estimated: true` block so the UI can label them as estimates, never as facts.
+#
+# Health score (0-100): 75% driven by rating quality, 25% by review volume.
+#   rating_score   = clamp((rating - 2.5) / 2.5, 0..1)          # 2.5★ -> 0, 5.0★ -> 100
+#   volume_score   = clamp(log10(count + 1) / log10(1000), 0..1) # ~1000 reviews -> 100
+#   health         = round(0.75 * rating_score + 0.25 * volume_score) * 100
+#
+# Money lost / week: two additive leaks, both anchored to a typical independent
+#   restaurant doing ~$12k/week (ASSUMED_WEEKLY_REVENUE).
+#   1. Reputation leak — a Harvard Business School study found ~5-9% revenue swing
+#      per star. We use 7% per star below a 4.7 "tables stay full" benchmark:
+#        reputation_loss = ASSUMED_WEEKLY_REVENUE * 0.07 * max(0, 4.7 - rating)
+#   2. Visibility leak — thin review counts sink you in local search. Below ~150
+#      reviews we scale a 3% discoverability penalty by how far short you are:
+#        visibility_loss = ASSUMED_WEEKLY_REVENUE * 0.03 * max(0, (150 - count) / 150)
+#   money_lost = round(reputation_loss + visibility_loss)
+BENCHMARK_RATING = 4.7
+ASSUMED_WEEKLY_REVENUE = 12000.0
+REVENUE_PER_STAR = 0.07
+VISIBILITY_REVIEW_FLOOR = 150
+VISIBILITY_PENALTY = 0.03
+
+
+def _estimate_health_score(rating: Optional[float], review_count: Optional[int]) -> int:
+    rating = rating or 0.0
+    review_count = review_count or 0
+    rating_score = max(0.0, min(1.0, (rating - 2.5) / 2.5))
+    volume_score = max(0.0, min(1.0, math.log10(review_count + 1) / math.log10(1000)))
+    score = round((0.75 * rating_score + 0.25 * volume_score) * 100)
+    return int(max(0, min(100, score)))
+
+
+def _estimate_money_lost_weekly(rating: Optional[float], review_count: Optional[int]) -> int:
+    rating = rating or 0.0
+    review_count = review_count or 0
+    reputation_loss = ASSUMED_WEEKLY_REVENUE * REVENUE_PER_STAR * max(0.0, BENCHMARK_RATING - rating)
+    visibility_loss = 0.0
+    if review_count < VISIBILITY_REVIEW_FLOOR:
+        shortfall = (VISIBILITY_REVIEW_FLOOR - review_count) / VISIBILITY_REVIEW_FLOOR
+        visibility_loss = ASSUMED_WEEKLY_REVENUE * VISIBILITY_PENALTY * shortfall
+    return int(round(reputation_loss + visibility_loss))
+
+
+def _health_label(score: int) -> str:
+    if score >= 75:
+        return "Good"
+    if score >= 50:
+        return "Needs work"
+    return "At risk"
+
+
+@api_router.post("/audit")
+async def free_audit(payload: AuditRequest):
+    name = (payload.name or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Restaurant name is required")
+
+    # The active provider (osm by default, google when a key is added) supplies
+    # the raw place facts. The heuristic formulas below are unchanged and simply
+    # consume rating + review_count from whatever provider is in use.
+    provider = get_provider()
+    try:
+        place = await provider.fetch(name, payload.city or "")
+    except PlaceNotFound:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
+    except DataSourceError as exc:
+        logger.error("Audit data-source error: %s", exc)
+        raise HTTPException(status_code=502, detail="Place lookup failed")
+
+    rating = place.get("rating")
+    review_count = place.get("review_count")
+
+    # --- Estimated / heuristic block (formulas unchanged) ---
+    health = _estimate_health_score(rating, review_count)
+    money_lost = _estimate_money_lost_weekly(rating, review_count)
+
+    return {
+        "found": True,
+        "data_source": place.get("data_source", "estimated"),
+        "place": {
+            "name": place.get("name"),
+            "address": place.get("address"),
+            "rating": rating,
+            "review_count": review_count,
+            "opening_hours": place.get("opening_hours") or {"open_now": None, "weekday_text": []},
+            "top_reviews": place.get("top_reviews") or [],
+        },
+        "estimated": {
+            "estimated": True,
+            "health_score": health,
+            "health_label": _health_label(health),
+            "money_lost_weekly": money_lost,
+            "basis": (
+                f"Estimated from rating "
+                f"({rating if rating is not None else 'n/a'}★) and "
+                f"{review_count if review_count is not None else 0} reviews. "
+                f"Benchmark {BENCHMARK_RATING}★, ~{int(REVENUE_PER_STAR * 100)}% weekly revenue per star."
+            ),
+        },
+    }
 
 
 app.include_router(api_router)

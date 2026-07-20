@@ -1,14 +1,26 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Star,
   MessageSquare,
-  TrendingDown,
-  TrendingUp,
+  Clock,
+  Activity,
+  Wrench,
+  Sparkles,
+  AlertTriangle,
   ArrowRight,
+  Download,
   Loader2,
 } from "lucide-react";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Kept in sync with the backend heuristics (server.py).
+const BENCHMARK_RATING = 4.7;
+const VISIBILITY_REVIEW_FLOOR = 150;
 
 // ---------- Loading steps ----------
 const LOADING_STEPS = [
@@ -19,213 +31,116 @@ const LOADING_STEPS = [
   { emoji: "💰", label: "Finding money leaks" },
 ];
 
-// ---------- Example chips (fictional, realistic) ----------
+// ---------- Example chips (real, findable restaurants) ----------
 const EXAMPLES = [
-  {
-    name: "The Corner Bistro · Manhattan",
-    key: "corner",
-  },
-  {
-    name: "Sunset Diner · Los Angeles",
-    key: "sunset",
-  },
-  {
-    name: "Nonna's Kitchen · Brooklyn",
-    key: "nonna",
-  },
+  { name: "Katz's Delicatessen", city: "New York", label: "Katz's Delicatessen · New York" },
+  { name: "Franklin Barbecue", city: "Austin", label: "Franklin Barbecue · Austin" },
+  { name: "Pike Place Chowder", city: "Seattle", label: "Pike Place Chowder · Seattle" },
 ];
 
-// Sample reports keyed to the example chips + a default for typed input
-const REPORT_TEMPLATES = {
-  corner: {
-    name: "The Corner Bistro",
-    location: "Manhattan, NY",
-    healthScore: 62,
-    kpis: [
-      { label: "Rating", value: "4.3", suffix: "★", icon: Star },
-      { label: "Unanswered reviews", value: "23", suffix: "%", icon: MessageSquare },
-      { label: "Busiest day", value: "Fri", icon: TrendingUp },
-      { label: "Slowest day", value: "Tue", icon: TrendingDown },
-    ],
-    peaks: [42, 38, 55, 68, 92, 78, 61], // Mon..Sun 0-100
-    findings: [
-      {
-        tier: "URGENT",
-        emoji: "🚨",
-        color: "#F87171",
-        bg: "rgba(220,38,38,0.10)",
-        bd: "rgba(220,38,38,0.35)",
-        title: "23% of your reviews go unanswered",
-        body: "Every review you ignore costs you future customers. People check before they eat.",
-        impact: "$410 / week",
-      },
-      {
-        tier: "FIX THIS",
-        emoji: "🔧",
-        color: "#FF6B2B",
-        bg: "rgba(232,80,10,0.12)",
-        bd: "rgba(232,80,10,0.40)",
-        title: "Tuesday lunch is 60% quieter than Friday",
-        body: "Same food. Same staff. Half the people. A small Tuesday offer usually pays for itself.",
-        impact: "$340 / week",
-      },
-      {
-        tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "Your rating slipped from 4.5 to 4.3 in 60 days",
-        body: "Reach out to the last 8 unhappy customers with an apology + free item. That usually gets 3 stars back up.",
-        impact: "$280 / week",
-      },
-      {
-        tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "4 similar spots nearby offer combo deals. You don't.",
-        body: "You have the best-margin dish on this block — bundle it. Most owners see attach rate jump ~18%.",
-        impact: "$190 / week",
-      },
-    ],
-  },
-  sunset: {
-    name: "Sunset Diner",
-    location: "Los Angeles, CA",
-    healthScore: 58,
-    kpis: [
-      { label: "Rating", value: "4.1", suffix: "★", icon: Star },
-      { label: "Unanswered reviews", value: "31", suffix: "%", icon: MessageSquare },
-      { label: "Busiest day", value: "Sat", icon: TrendingUp },
-      { label: "Slowest day", value: "Wed", icon: TrendingDown },
-    ],
-    peaks: [35, 48, 30, 55, 74, 96, 82],
-    findings: [
-      {
-        tier: "URGENT",
-        emoji: "🚨",
-        color: "#F87171",
-        bg: "rgba(220,38,38,0.10)",
-        bd: "rgba(220,38,38,0.35)",
-        title: "31% of your reviews get no reply",
-        body: "The 12 newest 3-star reviews all mention the same issue. Fix it and you'll see the score jump.",
-        impact: "$520 / week",
-      },
-      {
-        tier: "FIX THIS",
-        emoji: "🔧",
-        color: "#FF6B2B",
-        bg: "rgba(232,80,10,0.12)",
-        bd: "rgba(232,80,10,0.40)",
-        title: "Wednesday dinner is your quietest slot",
-        body: "You're paying full staff for half the tables. A midweek promo pays for itself in one night.",
-        impact: "$298 / week",
-      },
-      {
-        tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "Weekend brunch shows up in searches — but not on your menu",
-        body: "63 nearby people searched for brunch this week. You don't have one. Easy add.",
-        impact: "$430 / week",
-      },
-    ],
-  },
-  nonna: {
-    name: "Nonna's Kitchen",
-    location: "Brooklyn, NY",
-    healthScore: 71,
-    kpis: [
-      { label: "Rating", value: "4.6", suffix: "★", icon: Star },
-      { label: "Unanswered reviews", value: "14", suffix: "%", icon: MessageSquare },
-      { label: "Busiest day", value: "Sun", icon: TrendingUp },
-      { label: "Slowest day", value: "Mon", icon: TrendingDown },
-    ],
-    peaks: [28, 45, 58, 62, 80, 88, 95],
-    findings: [
-      {
-        tier: "FIX THIS",
-        emoji: "🔧",
-        color: "#FF6B2B",
-        bg: "rgba(232,80,10,0.12)",
-        bd: "rgba(232,80,10,0.40)",
-        title: "Monday is 68% quieter than Sunday",
-        body: "Your Sunday regulars are your best customers. Send them a Monday-only offer — most will come back.",
-        impact: "$360 / week",
-      },
-      {
-        tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "Your rating is 4.6 — top 15% in Brooklyn",
-        body: "Your best customers love you but don't share. A simple 'tell a friend, get dessert' can double word-of-mouth.",
-        impact: "$220 / week",
-      },
-      {
-        tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "Nobody knows about your Tuesday tasting menu",
-        body: "It's on the menu but not on Google. Add photos and it'll fill the slow midweek slot.",
-        impact: "$185 / week",
-      },
-    ],
-  },
+// Finding tiers -> Lucide icon + colour (no emojis in new UI, per brand rules).
+const TIER_STYLES = {
+  URGENT: { Icon: AlertTriangle, color: "#F87171", bg: "rgba(220,38,38,0.10)", bd: "rgba(220,38,38,0.35)" },
+  "FIX THIS": { Icon: Wrench, color: "#FF6B2B", bg: "rgba(232,80,10,0.12)", bd: "rgba(232,80,10,0.40)" },
+  OPPORTUNITY: { Icon: Sparkles, color: "#22C55E", bg: "rgba(22,163,74,0.10)", bd: "rgba(22,163,74,0.30)" },
 };
 
-const buildReportFor = (query) => {
-  // Realistic-but-fictional generator for a typed-in name
-  return {
-    name: query.replace(/https?:\/\/\S+/g, "").trim() || "Your Restaurant",
-    location: "Nearby",
-    healthScore: 64,
-    kpis: [
-      { label: "Rating", value: "4.2", suffix: "★", icon: Star },
-      { label: "Unanswered reviews", value: "27", suffix: "%", icon: MessageSquare },
-      { label: "Busiest day", value: "Sat", icon: TrendingUp },
-      { label: "Slowest day", value: "Tue", icon: TrendingDown },
-    ],
-    peaks: [38, 44, 50, 60, 82, 91, 70],
-    findings: [
-      {
-        tier: "URGENT",
-        emoji: "🚨",
-        color: "#F87171",
-        bg: "rgba(220,38,38,0.10)",
-        bd: "rgba(220,38,38,0.35)",
-        title: "27% of your reviews are unanswered",
-        body: "Answering reviews takes 5 minutes and lifts your rating within a month.",
-        impact: "$380 / week",
-      },
-      {
+// ---------- Turn the API response into what the report UI renders ----------
+const buildFindings = ({ rating, reviewCount, moneyLost, openNow }) => {
+  const out = [];
+
+  if (rating != null && rating < BENCHMARK_RATING) {
+    const gap = (BENCHMARK_RATING - rating).toFixed(1);
+    out.push({
+      tier: rating < 4.0 ? "URGENT" : "FIX THIS",
+      title: `Your rating is ${rating.toFixed(1)}★ — ${gap} below the 4.7 that keeps tables full`,
+      body: "Each star is worth ~5–9% of revenue. Reply to recent reviews and fix the top complaint — that's the fastest lift.",
+      impact: moneyLost ? `$${moneyLost.toLocaleString("en-US")} / week` : null,
+    });
+  } else if (rating != null) {
+    out.push({
+      tier: "OPPORTUNITY",
+      title: `Your ${rating.toFixed(1)}★ rating is doing the heavy lifting`,
+      body: "You're at or above the 4.7 benchmark. Protect it — a single quiet month of unanswered reviews can undo it fast.",
+      impact: null,
+    });
+  }
+
+  if (reviewCount != null) {
+    if (reviewCount < VISIBILITY_REVIEW_FLOOR) {
+      out.push({
         tier: "FIX THIS",
-        emoji: "🔧",
-        color: "#FF6B2B",
-        bg: "rgba(232,80,10,0.12)",
-        bd: "rgba(232,80,10,0.40)",
-        title: "Tuesday is 55% quieter than Saturday",
-        body: "You have too many staff on Tuesday for the customers you actually get.",
-        impact: "$310 / week",
-      },
-      {
+        title: `Only ${reviewCount.toLocaleString("en-US")} public reviews — you're hard to find`,
+        body: "Thin review counts push you down Google's local results. A simple 'leave us a review' prompt at checkout compounds every week.",
+        impact: null,
+      });
+    } else {
+      out.push({
         tier: "OPPORTUNITY",
-        emoji: "✨",
-        color: "#22C55E",
-        bg: "rgba(22,163,74,0.10)",
-        bd: "rgba(22,163,74,0.30)",
-        title: "3 spots on your street offer weekend deals — you don't",
-        body: "A simple weekend deal on your best dish would even the field fast.",
-        impact: "$240 / week",
-      },
-    ],
+        title: `${reviewCount.toLocaleString("en-US")} reviews is real reach`,
+        body: "You already have the audience. Turning happy reviewers into referrers is the cheapest growth you'll find.",
+        impact: null,
+      });
+    }
+  }
+
+  if (openNow === false) {
+    out.push({
+      tier: "OPPORTUNITY",
+      title: "You're closed right now — are your Google hours exact?",
+      body: "Wrong or missing hours are a top cause of lost walk-ins. Double-check every day, including holidays.",
+      impact: null,
+    });
+  }
+
+  return out.slice(0, 3);
+};
+
+const buildReportFromApi = (data) => {
+  const p = data.place || {};
+  const est = data.estimated || {};
+  const oh = p.opening_hours || {};
+  const rating = typeof p.rating === "number" ? p.rating : null;
+  const reviewCount = typeof p.review_count === "number" ? p.review_count : null;
+  const openNow = oh.open_now;
+  const moneyLost = est.money_lost_weekly ?? 0;
+
+  const kpis = [
+    {
+      label: "Rating",
+      value: rating != null ? rating.toFixed(1) : "—",
+      suffix: rating != null ? "★" : "",
+      icon: Star,
+    },
+    {
+      label: "Reviews",
+      value: reviewCount != null ? reviewCount.toLocaleString("en-US") : "—",
+      icon: MessageSquare,
+    },
+    {
+      label: "Open now",
+      value: openNow === true ? "Open" : openNow === false ? "Closed" : "—",
+      icon: Clock,
+    },
+    {
+      label: "Health",
+      value: est.health_score != null ? String(est.health_score) : "—",
+      suffix: "/100",
+      icon: Activity,
+    },
+  ];
+
+  return {
+    name: p.name || "Your restaurant",
+    location: p.address || "From public info only",
+    dataSource: data.data_source || "estimated",
+    healthScore: est.health_score ?? 0,
+    healthLabel: est.health_label || "",
+    moneyLost,
+    basis: est.basis || "",
+    kpis,
+    reviews: Array.isArray(p.top_reviews) ? p.top_reviews : [],
+    findings: buildFindings({ rating, reviewCount, moneyLost, openNow }),
   };
 };
 
@@ -287,71 +202,200 @@ const HealthScoreDial = ({ value }) => {
   );
 };
 
-const PeaksChart = ({ peaks }) => {
-  const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const max = Math.max(...peaks);
-  return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
-      data-testid="audit-peaks-chart"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-          When people actually show up
-        </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ghost">
-          Last 30 days
-        </div>
+// Real Google reviews — replaces the old (fabricated) popular-times chart,
+// since the Places API does not expose hourly traffic.
+const ReviewsPanel = ({ reviews }) => (
+  <div
+    className="rounded-2xl p-5"
+    style={{ background: "#0a0a0a", border: "1px solid #1E1E1E" }}
+    data-testid="audit-reviews"
+  >
+    <div className="flex items-center justify-between mb-4">
+      <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
+        What people are saying
       </div>
-      <div className="flex items-end justify-between gap-2" style={{ height: 96 }}>
-        {peaks.map((v, i) => {
-          const h = (v / max) * 100;
-          const isPeak = v === max;
-          return (
-            <div
-              key={i}
-              className="flex-1 flex flex-col items-center gap-2 justify-end"
-              data-testid={`audit-peak-bar-${i}`}
-            >
-              <div
-                className="w-full rounded-t-lg relative overflow-hidden"
-                style={{ height: `${h}%`, minHeight: 6 }}
-              >
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: "100%" }}
-                  transition={{ duration: 0.7, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    background: isPeak
-                      ? "linear-gradient(180deg, #FF6B2B, #E8500A)"
-                      : "linear-gradient(180deg, #333330, #1E1E1E)",
-                    width: "100%",
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                  }}
-                />
-              </div>
-              <div
-                className="font-mono uppercase tracking-[0.2em]"
-                style={{ fontSize: 9, color: isPeak ? "#FF6B2B" : "#6B6866" }}
-              >
-                {days[i]}
-              </div>
-            </div>
-          );
-        })}
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ghost">
+        From Google
       </div>
     </div>
+    {reviews.length === 0 ? (
+      <div className="text-muted-warm text-[13px]">No public reviews yet.</div>
+    ) : (
+      <div className="space-y-3">
+        {reviews.slice(0, 3).map((r, i) => (
+          <div
+            key={i}
+            className="rounded-xl p-3"
+            style={{ background: "#0d0d0d", border: "1px solid #1E1E1E" }}
+            data-testid={`audit-review-${i}`}
+          >
+            <div className="flex items-center justify-between mb-1 gap-2">
+              <span className="text-cream text-[13px] truncate" style={{ fontWeight: 500 }}>
+                {r.author || "Google user"}
+              </span>
+              {r.rating != null && (
+                <span className="font-mono text-[11px] text-orange whitespace-nowrap">
+                  {r.rating}★
+                </span>
+              )}
+            </div>
+            {r.text && (
+              <div
+                className="text-muted-warm text-[12.5px] leading-snug"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {r.text}
+              </div>
+            )}
+            {r.relative_time && (
+              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-ghost mt-1.5">
+                {r.relative_time}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+// ---------- PDF report template (separate, light, print-optimized) ----------
+// We do NOT screenshot the dark on-screen card. Building a fresh light DOM node
+// avoids framer-motion residue (the source of the faded health-score/title
+// "ghosting") and lets us control margins, spacing, and pagination for print.
+const escHtml = (s) =>
+  String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
   );
+
+const pdfScoreColor = (v) => (v >= 75 ? "#16A34A" : v >= 50 ? "#E8500A" : "#DC2626");
+const PDF_TIER_COLOR = { URGENT: "#DC2626", "FIX THIS": "#E8500A", OPPORTUNITY: "#16A34A" };
+
+const buildPdfTemplate = (report) => {
+  const money = "$" + (report.moneyLost || 0).toLocaleString("en-US") + " / wk";
+  const sColor = pdfScoreColor(report.healthScore);
+
+  const sectionTitle = (t) =>
+    `<div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#E8500A;font-weight:700;">${t}</div>`;
+
+  const kpiHtml = (report.kpis || [])
+    .map(
+      (k) => `
+      <div style="flex:1;border:1px solid #e6e2dc;border-radius:10px;padding:10px 12px;background:#faf8f5;">
+        <div style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#9a9691;">${escHtml(k.label)}</div>
+        <div style="font-size:19px;font-weight:800;color:#141414;margin-top:3px;">${escHtml(k.value)}${
+        k.suffix ? `<span style="font-size:12px;color:#E8500A;font-weight:700;"> ${escHtml(k.suffix)}</span>` : ""
+      }</div>
+      </div>`
+    )
+    .join("");
+
+  const findingsHtml =
+    (report.findings || [])
+      .map((f) => {
+        const c = PDF_TIER_COLOR[f.tier] || "#E8500A";
+        return `
+        <div style="border:1px solid #e6e2dc;border-left:4px solid ${c};border-radius:8px;padding:11px 13px;margin-top:9px;background:#ffffff;break-inside:avoid;page-break-inside:avoid;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <span style="font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${c};">${escHtml(f.tier)}</span>
+            ${f.impact ? `<span style="font-size:11px;font-weight:700;color:${c};white-space:nowrap;">~${escHtml(f.impact)}</span>` : ""}
+          </div>
+          <div style="font-size:13.5px;font-weight:600;color:#141414;margin-top:5px;line-height:1.3;">${escHtml(f.title)}</div>
+          <div style="font-size:11.5px;color:#5c5854;margin-top:4px;line-height:1.45;">${escHtml(f.body)}</div>
+        </div>`;
+      })
+      .join("") ||
+    `<div style="font-size:12px;color:#6B6866;margin-top:9px;">No findings.</div>`;
+
+  const reviewsHtml =
+    report.reviews && report.reviews.length
+      ? report.reviews
+          .slice(0, 3)
+          .map(
+            (r) => `
+          <div style="border:1px solid #e6e2dc;border-radius:8px;padding:10px 12px;margin-top:9px;background:#faf8f5;break-inside:avoid;page-break-inside:avoid;">
+            <div style="display:flex;justify-content:space-between;gap:10px;">
+              <span style="font-size:12px;font-weight:600;color:#141414;">${escHtml(r.author || "Google user")}</span>
+              ${r.rating != null ? `<span style="font-size:11px;font-weight:700;color:#E8500A;">${escHtml(r.rating)}★</span>` : ""}
+            </div>
+            ${r.text ? `<div style="font-size:11.5px;color:#5c5854;margin-top:4px;line-height:1.45;">${escHtml(r.text)}</div>` : ""}
+            ${
+              r.relative_time
+                ? `<div style="font-size:9.5px;color:#9a9691;margin-top:5px;text-transform:uppercase;letter-spacing:0.06em;">${escHtml(r.relative_time)}</div>`
+                : ""
+            }
+          </div>`
+          )
+          .join("")
+      : `<div style="font-size:12px;color:#6B6866;margin-top:9px;border:1px dashed #e0dcd5;border-radius:8px;padding:12px;background:#faf8f5;">No public reviews available for this restaurant.</div>`;
+
+  const bannerHtml =
+    report.dataSource === "estimated"
+      ? `<div style="flex:1;border:1px solid #f0d9c9;border-radius:12px;padding:13px 15px;background:#fff6f0;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:10.5px;font-weight:700;color:#B23A06;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">These numbers are estimated</div>
+          <div style="font-size:11.5px;line-height:1.5;color:#5c5854;">Location is real; rating and reviews are modelled from public map data. Full verified analysis is available once connected to Google.</div>
+        </div>`
+      : "";
+
+  const root = document.createElement("div");
+  root.setAttribute("data-jhax-pdf", "true");
+  root.style.cssText =
+    "width:100%;background:#ffffff;color:#141414;box-sizing:border-box;padding:2px 2px 6px;" +
+    "font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;" +
+    "opacity:1;transform:none;animation:none;transition:none;";
+  root.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #E8500A;padding-bottom:12px;">
+      <div style="min-width:0;">
+        <div style="font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#E8500A;font-weight:700;">Restaurant Health</div>
+        <div style="font-size:25px;font-weight:800;line-height:1.15;margin-top:4px;color:#141414;opacity:1;transform:none;animation:none;transition:none;">${escHtml(report.name)}</div>
+        <div style="font-size:11.5px;color:#6B6866;margin-top:4px;line-height:1.35;">${escHtml(report.location)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#9a9691;">Est. money lost</div>
+        <div style="font-size:22px;font-weight:800;color:#E8500A;line-height:1.05;margin-top:3px;white-space:nowrap;">${escHtml(money)}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:16px;">
+      <div style="flex-shrink:0;width:120px;border:1px solid #e6e2dc;border-radius:12px;padding:14px 10px;text-align:center;background:#faf8f5;">
+        <div style="font-size:40px;font-weight:800;line-height:1;color:${sColor};opacity:1;transform:none;animation:none;transition:none;">${escHtml(report.healthScore)}</div>
+        <div style="font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${sColor};margin-top:5px;font-weight:700;">${escHtml(report.healthLabel || "")}</div>
+        <div style="font-size:9px;color:#9a9691;margin-top:2px;">Health score / 100</div>
+      </div>
+      ${bannerHtml}
+    </div>
+
+    <div style="margin-top:20px;">
+      ${sectionTitle("Key numbers")}
+      <div style="display:flex;gap:9px;margin-top:8px;">${kpiHtml}</div>
+    </div>
+
+    <div style="margin-top:20px;">
+      ${sectionTitle("What JHAX found")}
+      ${findingsHtml}
+    </div>
+
+    <div style="margin-top:20px;">
+      ${sectionTitle("What people are saying")}
+      ${reviewsHtml}
+    </div>
+  `;
+  return root;
 };
 
 // ---------- Main component ----------
 const FreeAudit = () => {
   const [query, setQuery] = useState("");
-  const [state, setState] = useState("idle"); // idle | loading | report
+  const [state, setState] = useState("idle"); // idle | loading | report | error
   const [stepIndex, setStepIndex] = useState(0);
   const [report, setReport] = useState(null);
+  const [error, setError] = useState("");
+  const [pdfState, setPdfState] = useState("idle"); // idle | working
   const timeoutsRef = useRef([]);
 
   const clearTimers = () => {
@@ -361,47 +405,183 @@ const FreeAudit = () => {
 
   useEffect(() => () => clearTimers(), []);
 
-  const runLoading = (finalReport) => {
+  const parseQuery = (q) => {
+    const cleaned = (q || "").replace(/https?:\/\/\S+/g, "").trim();
+    const sep = cleaned.includes("·") ? "·" : cleaned.includes(",") ? "," : null;
+    if (sep) {
+      const idx = cleaned.indexOf(sep);
+      return {
+        name: cleaned.slice(0, idx).trim(),
+        city: cleaned.slice(idx + sep.length).trim(),
+      };
+    }
+    return { name: cleaned, city: "" };
+  };
+
+  const runAudit = async ({ name, city, display }) => {
     clearTimers();
+    if (display !== undefined) setQuery(display);
+    setError("");
+    setReport(null);
     setState("loading");
     setStepIndex(0);
+    // Advance the step indicators while the real request is in flight.
     LOADING_STEPS.forEach((_, i) => {
-      const t = setTimeout(() => setStepIndex(i), i * 780);
+      const t = setTimeout(() => setStepIndex(i), i * 620);
       timeoutsRef.current.push(t);
     });
-    const done = setTimeout(() => {
-      setReport(finalReport);
+
+    try {
+      const { data } = await axios.post(`${API}/audit`, { name, city });
+      clearTimers();
+      setStepIndex(LOADING_STEPS.length - 1);
+      setReport(buildReportFromApi(data));
       setState("report");
-    }, LOADING_STEPS.length * 780 + 250);
-    timeoutsRef.current.push(done);
+    } catch (err) {
+      clearTimers();
+      const status = err?.response?.status;
+      let msg;
+      if (status === 404) {
+        msg = `We couldn't find "${name}"${city ? ` in ${city}` : ""} on Google. Check the spelling, or add the city.`;
+      } else if (status === 503) {
+        msg = "Live lookups aren't switched on yet — this needs a Google Places API key.";
+      } else if (status === 400) {
+        msg = "Type a restaurant name to run the audit.";
+      } else {
+        msg = "Something went wrong looking that up. Give it another try in a moment.";
+      }
+      setError(msg);
+      setState("error");
+    }
   };
 
   const submit = (e) => {
     e?.preventDefault?.();
-    const q = query.trim();
-    if (!q) return;
-    runLoading(buildReportFor(q));
+    const { name, city } = parseQuery(query);
+    if (!name) return;
+    runAudit({ name, city });
   };
 
-  const submitExample = (key, name) => {
-    setQuery(name);
-    runLoading(REPORT_TEMPLATES[key]);
+  const submitExample = (ex) => {
+    runAudit({ name: ex.name, city: ex.city, display: ex.label });
   };
 
   const reset = () => {
     clearTimers();
     setState("idle");
     setReport(null);
+    setError("");
     setQuery("");
   };
 
-  const totalImpact = useMemo(() => {
-    if (!report) return 0;
-    return report.findings.reduce((sum, f) => {
-      const m = /\$([\d,]+)/.exec(f.impact || "");
-      return sum + (m ? parseInt(m[1].replace(/,/g, ""), 10) : 0);
-    }, 0);
-  }, [report]);
+  const slugify = (s) =>
+    (s || "restaurant")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "restaurant";
+
+  // Export a proper, print-optimized PDF report (NOT a screenshot of the dark
+  // on-screen card). We build a fresh light-background template from the report
+  // data, capture it with html2pdf.js on standard A4 pages with margins reserved
+  // for a running header/footer, then draw the header/footer + page numbers on
+  // every page via jsPDF. A4 in POINTS (unit:'pt') keeps html2pdf's pagebreak
+  // plugin and slicer consistent so content paginates cleanly with no cut-off.
+  const downloadPdf = async () => {
+    if (!report || pdfState === "working") return;
+    setPdfState("working");
+    let holder = null;
+    try {
+      // Ensure brand web-fonts are painted before rasterizing.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_) {
+          /* non-fatal */
+        }
+      }
+
+      const html2pdf = (await import("html2pdf.js")).default;
+      const el = buildPdfTemplate(report);
+
+      // Belt-and-suspenders anti-ghosting: force these off on every node right
+      // before capture so no inherited animation/transform/opacity can fade text.
+      el.querySelectorAll("*").forEach((n) => {
+        n.style.opacity = "1";
+        n.style.transform = "none";
+        n.style.animation = "none";
+        n.style.transition = "none";
+      });
+
+      // Attach off-screen so fonts/computed styles resolve during capture.
+      holder = document.createElement("div");
+      holder.style.cssText = "position:fixed;left:-10000px;top:0;width:676px;background:#ffffff;";
+      holder.appendChild(el);
+      document.body.appendChild(holder);
+
+      const dateStr = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      await html2pdf()
+        .set({
+          // [top, left, bottom, right] pt — reserves the header/footer bands and
+          // keeps content off every edge.
+          margin: [64, 44, 54, 44],
+          filename: `${slugify(report.name)}-jhax-audit-report.pdf`,
+          image: { type: "png" },
+          html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true },
+          jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+        })
+        .from(el)
+        .toPdf()
+        .get("pdf", (pdf) => {
+          const total = pdf.internal.getNumberOfPages();
+          const pw = pdf.internal.pageSize.getWidth();
+          const ph = pdf.internal.pageSize.getHeight();
+          for (let i = 1; i <= total; i++) {
+            pdf.setPage(i);
+
+            // Header: "JHAX — Free Restaurant Audit Report"  +  date
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(232, 80, 10);
+            pdf.text("JHAX", 44, 38);
+            const jw = pdf.getTextWidth("JHAX");
+            pdf.setFont("helvetica", "normal");
+            pdf.setTextColor(70, 70, 70);
+            pdf.text(" — Free Restaurant Audit Report", 44 + jw, 38);
+            pdf.setTextColor(150, 150, 150);
+            pdf.text(dateStr, pw - 44, 38, { align: "right" });
+            pdf.setDrawColor(228, 224, 218);
+            pdf.setLineWidth(0.5);
+            pdf.line(44, 46, pw - 44, 46);
+
+            // Footer: "Generated by JHAX"  +  page number
+            pdf.setDrawColor(228, 224, 218);
+            pdf.setLineWidth(0.5);
+            pdf.line(44, ph - 36, pw - 44, ph - 36);
+            pdf.setFontSize(8.5);
+            pdf.setFont("helvetica", "normal");
+            pdf.setTextColor(150, 150, 150);
+            pdf.text("Generated by JHAX", 44, ph - 22);
+            pdf.text(`Page ${i} of ${total}`, pw - 44, ph - 22, { align: "right" });
+          }
+        })
+        .save();
+    } catch (err) {
+      // Keep the report intact; surface the failure without a hard crash.
+      // eslint-disable-next-line no-console
+      console.error("PDF export failed", err);
+    } finally {
+      if (holder && holder.parentNode) holder.parentNode.removeChild(holder);
+      setPdfState("idle");
+    }
+  };
+
+  const totalImpact = report ? report.moneyLost : 0;
 
   return (
     <section
@@ -482,7 +662,7 @@ const FreeAudit = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Restaurant name or Google Maps link"
+              placeholder="Restaurant name and city (e.g. Joe's Pizza, New York)"
               data-testid="audit-input"
               className="flex-1 bg-transparent outline-none text-cream placeholder:text-muted-warm"
               style={{ fontSize: 15, fontWeight: 500 }}
@@ -526,11 +706,11 @@ const FreeAudit = () => {
           </span>
           {EXAMPLES.map((ex) => (
             <button
-              key={ex.key}
+              key={ex.label}
               type="button"
-              onClick={() => submitExample(ex.key, ex.name)}
+              onClick={() => submitExample(ex)}
               disabled={state === "loading"}
-              data-testid={`audit-example-${ex.key}`}
+              data-testid={`audit-example-${ex.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}
               className="rounded-full transition-colors"
               style={{
                 background: "#0d0d0d",
@@ -550,7 +730,7 @@ const FreeAudit = () => {
                 e.currentTarget.style.color = "#6B6866";
               }}
             >
-              {ex.name}
+              {ex.label}
             </button>
           ))}
         </div>
@@ -627,6 +807,52 @@ const FreeAudit = () => {
           )}
         </AnimatePresence>
 
+        {/* Error panel */}
+        <AnimatePresence>
+          {state === "error" && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.45 }}
+              className="mt-10 mx-auto max-w-[720px] rounded-2xl p-6 md:p-7 flex items-start gap-4"
+              style={{
+                background: "#0d0d0d",
+                border: "1px solid rgba(220,38,38,0.35)",
+              }}
+              data-testid="audit-error"
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(220,38,38,0.10)", border: "1px solid rgba(220,38,38,0.35)" }}
+              >
+                <AlertTriangle size={18} color="#F87171" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-mono text-[10px] uppercase tracking-[0.24em] mb-1" style={{ color: "#F87171" }}>
+                  Restaurant not found
+                </div>
+                <div className="text-cream text-[15px]" style={{ fontWeight: 500, lineHeight: 1.3 }}>
+                  {error}
+                </div>
+                <button
+                  type="button"
+                  onClick={reset}
+                  data-testid="audit-error-retry"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full text-[13px] font-semibold"
+                  style={{
+                    background: "#E8500A",
+                    color: "#fff",
+                    padding: "10px 18px",
+                  }}
+                >
+                  Try again
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Report */}
         <AnimatePresence>
           {state === "report" && report && (
@@ -694,10 +920,31 @@ const FreeAudit = () => {
                       ${totalImpact.toLocaleString("en-US")}
                     </div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-warm mt-1">
-                      Every week
+                      Every week · Estimated
                     </div>
                   </div>
                 </div>
+
+                {/* Estimated-data note (OSM provider — no verified ratings yet) */}
+                {report.dataSource === "estimated" && (
+                  <div
+                    className="mt-5 flex items-start gap-3 rounded-xl p-3.5"
+                    style={{
+                      background: "rgba(232,80,10,0.06)",
+                      border: "1px solid rgba(232,80,10,0.22)",
+                    }}
+                    data-testid="audit-estimated-note"
+                  >
+                    <AlertTriangle size={15} color="#FF6B2B" className="flex-shrink-0 mt-0.5" />
+                    <div className="text-muted-warm text-[12.5px] leading-snug">
+                      <span className="text-cream" style={{ fontWeight: 500 }}>
+                        These numbers are estimated.
+                      </span>{" "}
+                      Location is real; rating and reviews are modelled from public map data.
+                      Full verified analysis is available once connected to Google.
+                    </div>
+                  </div>
+                )}
 
                 {/* KPI pills */}
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -737,69 +984,81 @@ const FreeAudit = () => {
                   })}
                 </div>
 
-                {/* Findings + Peaks */}
+                {/* Estimate basis note */}
+                {report.basis && (
+                  <div
+                    className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-ghost"
+                    data-testid="audit-basis"
+                  >
+                    {report.basis}
+                  </div>
+                )}
+
+                {/* Findings + Reviews */}
                 <div className="mt-6 grid gap-5 lg:grid-cols-[1.4fr,1fr]">
                   <div className="space-y-3">
                     <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
                       What JHAX found
                     </div>
-                    {report.findings.map((f, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.15 + i * 0.08 }}
-                        className="rounded-xl p-4 flex items-start gap-3"
-                        style={{ background: "#0a0a0a", border: `1px solid ${f.bd}` }}
-                        data-testid={`audit-finding-${i}`}
-                      >
-                        <div
-                          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{
-                            background: f.bg,
-                            border: `1px solid ${f.bd}`,
-                            fontSize: 16,
-                          }}
+                    {report.findings.map((f, i) => {
+                      const st = TIER_STYLES[f.tier] || TIER_STYLES.OPPORTUNITY;
+                      const Icon = st.Icon;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.15 + i * 0.08 }}
+                          className="rounded-xl p-4 flex items-start gap-3"
+                          style={{ background: "#0a0a0a", border: `1px solid ${st.bd}` }}
+                          data-testid={`audit-finding-${i}`}
                         >
-                          {f.emoji}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                            <span
-                              className="font-mono text-[9.5px] uppercase tracking-[0.22em] px-2 py-0.5 rounded-full"
-                              style={{
-                                color: f.color,
-                                background: f.bg,
-                                border: `1px solid ${f.bd}`,
-                              }}
-                            >
-                              {f.tier}
-                            </span>
-                            <span
-                              className="font-mono text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap"
-                              style={{
-                                color: f.color,
-                                background: f.bg,
-                                border: `1px solid ${f.bd}`,
-                              }}
-                            >
-                              ~{f.impact}
-                            </span>
-                          </div>
                           <div
-                            className="text-cream text-[15px]"
-                            style={{ fontWeight: 500, lineHeight: 1.25 }}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: st.bg, border: `1px solid ${st.bd}` }}
                           >
-                            {f.title}
+                            <Icon size={16} color={st.color} />
                           </div>
-                          <div className="text-muted-warm text-[13px] mt-1 leading-snug">
-                            {f.body}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                              <span
+                                className="font-mono text-[9.5px] uppercase tracking-[0.22em] px-2 py-0.5 rounded-full"
+                                style={{
+                                  color: st.color,
+                                  background: st.bg,
+                                  border: `1px solid ${st.bd}`,
+                                }}
+                              >
+                                {f.tier}
+                              </span>
+                              {f.impact && (
+                                <span
+                                  className="font-mono text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap"
+                                  style={{
+                                    color: st.color,
+                                    background: st.bg,
+                                    border: `1px solid ${st.bd}`,
+                                  }}
+                                >
+                                  ~{f.impact}
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              className="text-cream text-[15px]"
+                              style={{ fontWeight: 500, lineHeight: 1.25 }}
+                            >
+                              {f.title}
+                            </div>
+                            <div className="text-muted-warm text-[13px] mt-1 leading-snug">
+                              {f.body}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                  <PeaksChart peaks={report.peaks} />
+                  <ReviewsPanel reviews={report.reviews} />
                 </div>
 
                 {/* Bottom CTA */}
@@ -826,6 +1085,31 @@ const FreeAudit = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={downloadPdf}
+                      disabled={pdfState === "working"}
+                      data-testid="audit-download"
+                      data-html2canvas-ignore="true"
+                      className="inline-flex items-center gap-2 rounded-full text-[13px] font-semibold"
+                      style={{
+                        background: "#0a0a0a",
+                        border: "1px solid rgba(232,80,10,0.45)",
+                        color: "#FF6B2B",
+                        padding: "12px 18px",
+                        opacity: pdfState === "working" ? 0.6 : 1,
+                      }}
+                    >
+                      {pdfState === "working" ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" /> Preparing…
+                        </>
+                      ) : (
+                        <>
+                          <Download size={14} /> Download report
+                        </>
+                      )}
+                    </button>
                     <button
                       type="button"
                       onClick={reset}
@@ -867,7 +1151,7 @@ const FreeAudit = () => {
             <span>·</span>
             <span>No sign-up needed</span>
             <span>·</span>
-            <span>Takes ~4 seconds</span>
+            <span>Real Google data</span>
           </div>
         )}
       </div>
