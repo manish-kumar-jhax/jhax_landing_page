@@ -619,16 +619,16 @@ const FreeAudit = () => {
     const email = signup.email.trim();
     const phone = signup.phone.trim();
 
-    if (!businessName || !personName || !email || !phone) {
-      setSignupError("Please fill in all four fields.");
+    if (!businessName || !personName || !email) {
+      setSignupError("Please fill in business name, your name, and email.");
       return;
     }
     if (!validEmail(email)) {
       setSignupError("Please enter a valid email address.");
       return;
     }
-    if (phone.replace(/\D/g, "").length < 7) {
-      setSignupError("Please enter a valid phone number.");
+    if (phone && phone.replace(/\D/g, "").length < 7) {
+      setSignupError("Please enter a valid phone number, or leave it blank.");
       return;
     }
 
@@ -639,7 +639,7 @@ const FreeAudit = () => {
         email,
         business_name: businessName,
         person_name: personName,
-        phone,
+        phone: phone || null,
         source: "audit_report_download",
       });
       setSignedUp(true);
@@ -1300,7 +1300,7 @@ const FreeAudit = () => {
                     { key: "businessName", label: "Business name", placeholder: "e.g. The Corner Bistro", Icon: Building2, type: "text", testid: "signup-business" },
                     { key: "personName", label: "Your name", placeholder: "e.g. Maria Lopez", Icon: User, type: "text", testid: "signup-name" },
                     { key: "email", label: "Email", placeholder: "you@restaurant.com", Icon: Mail, type: "email", testid: "signup-email" },
-                    { key: "phone", label: "Phone", placeholder: "(555) 123-4567", Icon: Phone, type: "tel", testid: "signup-phone" },
+                    { key: "phone", label: "Phone (optional)", placeholder: "(555) 123-4567", Icon: Phone, type: "tel", testid: "signup-phone" },
                   ].map(({ key, label, placeholder, Icon, type, testid }) => (
                     <div key={key}>
                       <label className="font-mono text-[9px] uppercase tracking-[0.18em] text-ghost">
