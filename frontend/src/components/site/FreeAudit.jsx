@@ -15,7 +15,10 @@ import {
   Loader2,
 } from "lucide-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Prefer the build-time env var (set on Vercel); fall back to the deployed
+// Render backend so the app still works if the env var isn't configured.
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL || "https://jhax-landing-page.onrender.com";
 const API = `${BACKEND_URL}/api`;
 
 // Kept in sync with the backend heuristics (server.py).

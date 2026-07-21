@@ -210,10 +210,19 @@ async def free_audit(payload: AuditRequest):
 
 app.include_router(api_router)
 
+# CORS. CORS_ORIGINS is a comma-separated list of allowed frontend origins, e.g.
+#   "https://jhax-landing.vercel.app,http://localhost:3000"
+# Use "*" to allow any origin. Note: a literal "*" in allow_origins can't be sent
+# together with credentials, so when "*" is requested we reflect the caller's
+# origin via allow_origin_regex instead (works with allow_credentials=True).
+_cors_origins = [o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()]
+_allow_all_origins = '*' in _cors_origins
+
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[] if _allow_all_origins else _cors_origins,
+    allow_origin_regex='.*' if _allow_all_origins else None,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
