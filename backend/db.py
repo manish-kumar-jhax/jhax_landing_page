@@ -6,9 +6,11 @@ Render provides DATABASE_URL automatically when you attach a Postgres instance;
 it may hand out the bare `postgres://` form, which we normalize below.
 """
 import os
+import ssl as _ssl
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 from dotenv import load_dotenv
 from sqlalchemy import String, DateTime
@@ -25,19 +27,45 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 load_dotenv(Path(__file__).parent / ".env")
 
 
-def _normalize_db_url(url: str) -> str:
-    """Return an asyncpg-driver URL. Accepts postgres://, postgresql://, or an
-    already-qualified postgresql+asyncpg:// string."""
+def _build_engine_config(url: str):
+    """Return (async_url, connect_args).
+
+    - Normalizes the scheme to the asyncpg driver (Render/Heroku hand out
+      `postgres://`; SQLAlchemy async needs `postgresql+asyncpg://`).
+    - Strips libpq-only query params that asyncpg REJECTS (notably `sslmode`,
+      which caused `connect() got an unexpected keyword argument 'sslmode'`).
+      If SSL was requested, translate it into asyncpg's `ssl` connect arg.
+    """
     if not url:
-        return url
+        return "", {}
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
     if url.startswith("postgresql://"):
         url = "postgresql+asyncpg://" + url[len("postgresql://"):]
-    return url
+
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query))
+    sslmode = query.pop("sslmode", None)
+    # asyncpg doesn't understand these libpq params either — drop them.
+    for k in ("channel_binding", "sslrootcert", "sslcert", "sslkey"):
+        query.pop(k, None)
+
+    connect_args = {}
+    if sslmode and sslmode != "disable":
+        # Managed Postgres (Render/Neon/Supabase) needs SSL from outside. Use a
+        # permissive context so cert/hostname quirks don't block startup.
+        ctx = _ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = _ssl.CERT_NONE
+        connect_args["ssl"] = ctx
+
+    clean_url = urlunsplit(
+        (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+    )
+    return clean_url, connect_args
 
 
-DATABASE_URL = _normalize_db_url(os.environ.get("DATABASE_URL", ""))
+DATABASE_URL, _CONNECT_ARGS = _build_engine_config(os.environ.get("DATABASE_URL", ""))
 
 
 class Base(DeclarativeBase):
@@ -62,7 +90,11 @@ class StatusCheckORM(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
-engine = create_async_engine(DATABASE_URL, pool_pre_ping=True) if DATABASE_URL else None
+engine = (
+    create_async_engine(DATABASE_URL, pool_pre_ping=True, connect_args=_CONNECT_ARGS)
+    if DATABASE_URL
+    else None
+)
 async_session: Optional[async_sessionmaker] = (
     async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) if engine else None
 )
