@@ -13,6 +13,11 @@ import {
   ArrowRight,
   Download,
   Loader2,
+  X,
+  Building2,
+  User,
+  Mail,
+  Phone,
 } from "lucide-react";
 
 // Prefer the build-time env var (set on Vercel); fall back to the deployed
@@ -399,6 +404,17 @@ const FreeAudit = () => {
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
   const [pdfState, setPdfState] = useState("idle"); // idle | working
+  // Signup gate before the report download
+  const [showSignup, setShowSignup] = useState(false);
+  const [signedUp, setSignedUp] = useState(false); // once per session
+  const [signup, setSignup] = useState({
+    businessName: "",
+    personName: "",
+    email: "",
+    phone: "",
+  });
+  const [signupState, setSignupState] = useState("idle"); // idle | submitting
+  const [signupError, setSignupError] = useState("");
   const timeoutsRef = useRef([]);
 
   const clearTimers = () => {
@@ -581,6 +597,58 @@ const FreeAudit = () => {
     } finally {
       if (holder && holder.parentNode) holder.parentNode.removeChild(holder);
       setPdfState("idle");
+    }
+  };
+
+  // Download button → require a one-time signup first (this session).
+  const handleDownloadClick = () => {
+    if (signedUp) {
+      downloadPdf();
+      return;
+    }
+    setSignupError("");
+    setShowSignup(true);
+  };
+
+  const validEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+  const submitSignup = async (e) => {
+    e?.preventDefault?.();
+    const businessName = signup.businessName.trim();
+    const personName = signup.personName.trim();
+    const email = signup.email.trim();
+    const phone = signup.phone.trim();
+
+    if (!businessName || !personName || !email || !phone) {
+      setSignupError("Please fill in all four fields.");
+      return;
+    }
+    if (!validEmail(email)) {
+      setSignupError("Please enter a valid email address.");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 7) {
+      setSignupError("Please enter a valid phone number.");
+      return;
+    }
+
+    setSignupState("submitting");
+    setSignupError("");
+    try {
+      await axios.post(`${API}/leads`, {
+        email,
+        business_name: businessName,
+        person_name: personName,
+        phone,
+        source: "audit_report_download",
+      });
+      setSignedUp(true);
+      setShowSignup(false);
+      setSignupState("idle");
+      downloadPdf(); // proceed to the report the moment signup succeeds
+    } catch (err) {
+      setSignupState("idle");
+      setSignupError("Something went wrong. Please try again.");
     }
   };
 
@@ -1090,7 +1158,7 @@ const FreeAudit = () => {
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={downloadPdf}
+                      onClick={handleDownloadClick}
                       disabled={pdfState === "working"}
                       data-testid="audit-download"
                       data-html2canvas-ignore="true"
@@ -1152,12 +1220,154 @@ const FreeAudit = () => {
           <div className="mt-8 flex items-center justify-center gap-6 font-mono text-[10.5px] uppercase tracking-[0.2em] text-ghost">
             <span>Uses only public info</span>
             <span>·</span>
-            <span>No sign-up needed</span>
+            <span>Instant results</span>
             <span>·</span>
             <span>Real Google data</span>
           </div>
         )}
       </div>
+
+      {/* Signup gate before report download */}
+      <AnimatePresence>
+        {showSignup && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            style={{ background: "rgba(4,4,4,0.72)", backdropFilter: "blur(4px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => signupState !== "submitting" && setShowSignup(false)}
+            data-testid="audit-signup-overlay"
+          >
+            <motion.div
+              className="w-full max-w-[440px] rounded-[20px] relative overflow-hidden"
+              style={{
+                background: "#0d0d0d",
+                border: "1px solid rgba(232,80,10,0.3)",
+                boxShadow: "0 40px 120px -40px rgba(232,80,10,0.45)",
+              }}
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              data-testid="audit-signup-modal"
+            >
+              <div
+                aria-hidden
+                className="absolute top-0 left-0 right-0 h-[3px]"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent, #E8500A 30%, #FF6B2B 60%, transparent)",
+                }}
+              />
+              <div className="p-6 md:p-7">
+                <button
+                  type="button"
+                  onClick={() => signupState !== "submitting" && setShowSignup(false)}
+                  data-testid="audit-signup-close"
+                  className="absolute top-4 right-4 flex items-center justify-center rounded-full"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    background: "#0a0a0a",
+                    border: "1px solid #1E1E1E",
+                    color: "#6B6866",
+                  }}
+                >
+                  <X size={15} />
+                </button>
+
+                <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
+                  One quick step
+                </div>
+                <h3
+                  className="font-display text-cream mt-2"
+                  style={{ fontSize: 24, letterSpacing: "-0.02em", lineHeight: 1.15 }}
+                >
+                  Get your full report
+                </h3>
+                <p
+                  className="text-muted-warm text-[13.5px] mt-2"
+                  style={{ lineHeight: 1.5 }}
+                >
+                  Tell us where to send it — your PDF downloads right away.
+                </p>
+
+                <form onSubmit={submitSignup} className="mt-5 space-y-3" data-testid="audit-signup-form">
+                  {[
+                    { key: "businessName", label: "Business name", placeholder: "e.g. The Corner Bistro", Icon: Building2, type: "text", testid: "signup-business" },
+                    { key: "personName", label: "Your name", placeholder: "e.g. Maria Lopez", Icon: User, type: "text", testid: "signup-name" },
+                    { key: "email", label: "Email", placeholder: "you@restaurant.com", Icon: Mail, type: "email", testid: "signup-email" },
+                    { key: "phone", label: "Phone", placeholder: "(555) 123-4567", Icon: Phone, type: "tel", testid: "signup-phone" },
+                  ].map(({ key, label, placeholder, Icon, type, testid }) => (
+                    <div key={key}>
+                      <label className="font-mono text-[9px] uppercase tracking-[0.18em] text-ghost">
+                        {label}
+                      </label>
+                      <div
+                        className="flex items-center gap-2 mt-1 rounded-lg px-3"
+                        style={{ background: "#0a0a0a", border: "1px solid #1E1E1E", height: 44 }}
+                      >
+                        <Icon size={14} className="text-muted-warm flex-shrink-0" />
+                        <input
+                          type={type}
+                          value={signup[key]}
+                          onChange={(e) => setSignup((s) => ({ ...s, [key]: e.target.value }))}
+                          placeholder={placeholder}
+                          disabled={signupState === "submitting"}
+                          data-testid={`audit-${testid}`}
+                          className="flex-1 bg-transparent outline-none text-cream placeholder:text-muted-warm"
+                          style={{ fontSize: 14 }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {signupError && (
+                    <div
+                      className="text-[12.5px] flex items-center gap-2"
+                      style={{ color: "#F87171" }}
+                      data-testid="audit-signup-error"
+                    >
+                      <AlertTriangle size={13} /> {signupError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={signupState === "submitting"}
+                    data-testid="audit-signup-submit"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full font-semibold mt-1"
+                    style={{
+                      background: "#E8500A",
+                      color: "#fff",
+                      height: 48,
+                      fontSize: 15,
+                      opacity: signupState === "submitting" ? 0.6 : 1,
+                      boxShadow: "0 16px 40px -14px rgba(232,80,10,0.6)",
+                    }}
+                  >
+                    {signupState === "submitting" ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" /> Preparing your report…
+                      </>
+                    ) : (
+                      <>
+                        Download my report <Download size={15} />
+                      </>
+                    )}
+                  </button>
+                  <div className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ghost text-center">
+                    No spam · Only about your audit
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from sqlalchemy import select
 import os
 import math
 import logging
@@ -12,15 +12,11 @@ import uuid
 from datetime import datetime, timezone
 
 from data_source import get_provider, PlaceNotFound, DataSourceError
+from db import async_session, init_db, dispose_db, LeadORM, StatusCheckORM
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 app = FastAPI(title="JHAX.ai API")
 api_router = APIRouter(prefix="/api")
@@ -41,6 +37,9 @@ class StatusCheckCreate(BaseModel):
 class LeadCreate(BaseModel):
     email: EmailStr
     source: Optional[str] = "final_cta"
+    business_name: Optional[str] = None
+    person_name: Optional[str] = None
+    phone: Optional[str] = None
 
 
 class Lead(BaseModel):
@@ -48,6 +47,9 @@ class Lead(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     source: str = "final_cta"
+    business_name: Optional[str] = None
+    person_name: Optional[str] = None
+    phone: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -60,40 +62,69 @@ async def root():
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_obj = StatusCheck(**input.model_dump())
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    await db.status_checks.insert_one(doc)
+    async with async_session() as session:
+        session.add(StatusCheckORM(
+            id=status_obj.id,
+            client_name=status_obj.client_name,
+            timestamp=status_obj.timestamp,
+        ))
+        await session.commit()
     return status_obj
 
 
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    return status_checks
+    async with async_session() as session:
+        rows = (await session.execute(select(StatusCheckORM))).scalars().all()
+    return [
+        StatusCheck(id=r.id, client_name=r.client_name, timestamp=r.timestamp)
+        for r in rows
+    ]
 
 
 @api_router.post("/leads", response_model=Lead)
 async def create_lead(payload: LeadCreate):
     if not payload.email:
         raise HTTPException(status_code=400, detail="Email required")
-    lead = Lead(email=payload.email, source=payload.source or "final_cta")
-    doc = lead.model_dump()
-    doc['created_at'] = doc['created_at'].isoformat()
-    doc['email'] = str(doc['email'])
-    await db.leads.insert_one(doc)
+    lead = Lead(
+        email=payload.email,
+        source=payload.source or "final_cta",
+        business_name=payload.business_name,
+        person_name=payload.person_name,
+        phone=payload.phone,
+    )
+    async with async_session() as session:
+        session.add(LeadORM(
+            id=lead.id,
+            email=str(lead.email),
+            source=lead.source,
+            business_name=lead.business_name,
+            person_name=lead.person_name,
+            phone=lead.phone,
+            created_at=lead.created_at,
+        ))
+        await session.commit()
     return lead
 
 
 @api_router.get("/leads", response_model=List[Lead])
 async def list_leads():
-    docs = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    for d in docs:
-        if isinstance(d.get('created_at'), str):
-            d['created_at'] = datetime.fromisoformat(d['created_at'])
-    return docs
+    async with async_session() as session:
+        rows = (
+            await session.execute(select(LeadORM).order_by(LeadORM.created_at.desc()))
+        ).scalars().all()
+    return [
+        Lead(
+            id=r.id,
+            email=r.email,
+            source=r.source,
+            business_name=r.business_name,
+            person_name=r.person_name,
+            phone=r.phone,
+            created_at=r.created_at,
+        )
+        for r in rows
+    ]
 
 
 # ---------- Free Audit (Google Places) ----------
@@ -231,6 +262,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 
+@app.on_event("startup")
+async def startup_db():
+    # Create tables if they don't exist yet.
+    await init_db()
+
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+async def shutdown_db():
+    await dispose_db()
