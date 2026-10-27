@@ -83,6 +83,22 @@ class LeadORM(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class DemoRequestORM(Base):
+    """Maps onto the admin console's existing `demo_requests` table."""
+    __tablename__ = "demo_requests"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    phone: Mapped[str] = mapped_column(String, nullable=False)
+    restaurant: Mapped[str] = mapped_column(String, nullable=False)
+    locations: Mapped[str] = mapped_column(String, nullable=False)
+    pos: Mapped[str] = mapped_column(String, nullable=False, default="")
+    notes: Mapped[str] = mapped_column(String, nullable=False, default="")
+    market: Mapped[str] = mapped_column(String, nullable=False, default="us")
+    status: Mapped[str] = mapped_column(String, nullable=False, default="new")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class StatusCheckORM(Base):
     __tablename__ = "status_checks"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime, timezone
 
 from data_source import get_provider, PlaceNotFound, DataSourceError
-from db import async_session, init_db, dispose_db, LeadORM, StatusCheckORM
+from db import async_session, init_db, dispose_db, LeadORM, StatusCheckORM, DemoRequestORM
 
 
 ROOT_DIR = Path(__file__).parent
@@ -51,6 +51,16 @@ class Lead(BaseModel):
     person_name: Optional[str] = None
     phone: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class DemoRequestCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    email: EmailStr
+    phone: str = Field(min_length=1, max_length=64)
+    restaurant: str = Field(min_length=1, max_length=255)
+    locations: str = Field(min_length=1, max_length=32)
+    pos: str = Field(default="", max_length=64)
+    notes: str = Field(default="", max_length=2000)
 
 
 # ---------- Routes ----------
@@ -105,6 +115,28 @@ async def create_lead(payload: LeadCreate):
         ))
         await session.commit()
     return lead
+
+
+@api_router.post("/demo-requests")
+async def create_demo_request(payload: DemoRequestCreate):
+    """Store a demo booking in `demo_requests`; the admin console reads it from there."""
+    req_id = str(uuid.uuid4())
+    async with async_session() as session:
+        session.add(DemoRequestORM(
+            id=req_id,
+            name=payload.name.strip(),
+            email=str(payload.email),
+            phone=payload.phone.strip(),
+            restaurant=payload.restaurant.strip(),
+            locations=payload.locations.strip(),
+            pos=payload.pos.strip(),
+            notes=payload.notes.strip(),
+            market="us",
+            status="new",
+            created_at=datetime.now(timezone.utc),
+        ))
+        await session.commit()
+    return {"id": req_id, "status": "new"}
 
 
 @api_router.get("/leads", response_model=List[Lead])

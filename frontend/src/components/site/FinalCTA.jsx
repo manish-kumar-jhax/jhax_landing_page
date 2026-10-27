@@ -10,14 +10,31 @@ const BACKEND_URL =
 const API = `${BACKEND_URL}/api`;
 
 const FinalCTA = () => {
-  const [email, setEmail] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    restaurant: "",
+    locations: "",
+  });
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [message, setMessage] = useState("");
 
   const validate = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
+  const setField = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+    if (status === "error") setStatus("idle");
+  };
+
   const submit = async (e) => {
     e?.preventDefault();
+    const { name, email, phone, restaurant, locations } = form;
+    if (!name.trim() || !restaurant.trim() || !phone.trim() || !locations.trim()) {
+      setStatus("error");
+      setMessage("Please fill in every field");
+      return;
+    }
     if (!validate(email)) {
       setStatus("error");
       setMessage("Please enter a valid email");
@@ -25,10 +42,10 @@ const FinalCTA = () => {
     }
     setStatus("loading");
     try {
-      await axios.post(`${API}/leads`, { email, source: "final_cta" });
+      await axios.post(`${API}/demo-requests`, form);
       setStatus("success");
       setMessage("We'll be in touch within 24 hours");
-      setEmail("");
+      setForm({ name: "", email: "", phone: "", restaurant: "", locations: "" });
       setTimeout(() => {
         setStatus("idle");
         setMessage("");
@@ -45,6 +62,10 @@ const FinalCTA = () => {
       : status === "error"
       ? "#DC2626"
       : "rgba(255,255,255,0.10)";
+
+  const inputClass =
+    "w-full h-[56px] px-6 rounded-full bg-transparent text-cream placeholder:text-muted-warm outline-none transition-all";
+  const inputStyle = { background: "#0d0d0d", fontSize: 15, fontWeight: 500 };
 
   return (
     <section
@@ -116,38 +137,88 @@ const FinalCTA = () => {
           onSubmit={submit}
           noValidate
           data-testid="lead-form"
-          className="mt-10 mx-auto flex flex-col sm:flex-row gap-3 max-w-[560px]"
+          className="mt-10 mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-[640px]"
         >
-          <div className="relative flex-1">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (status === "error") setStatus("idle");
-              }}
-              placeholder={status === "success" ? "✓ We'll be in touch within 24 hours!" : "your@email.com"}
-              data-testid="lead-email-input"
-              className="w-full h-[56px] px-6 rounded-full bg-transparent text-cream placeholder:text-muted-warm outline-none transition-all"
-              style={{
-                border: `1px solid ${borderColor}`,
-                background: "#0d0d0d",
-                fontSize: 15,
-                fontWeight: 500,
-              }}
-              onFocus={(e) => {
-                if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
-              }}
-              onBlur={(e) => {
-                if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
-              }}
-            />
-          </div>
+          <input
+            type="text"
+            value={form.name}
+            onChange={setField("name")}
+            placeholder="Your name"
+            data-testid="lead-name-input"
+            className={inputClass}
+            style={{ ...inputStyle, border: `1px solid ${borderColor}` }}
+            onFocus={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
+            }}
+            onBlur={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          />
+          <input
+            type="email"
+            value={form.email}
+            onChange={setField("email")}
+            placeholder="your@email.com"
+            data-testid="lead-email-input"
+            className={inputClass}
+            style={{ ...inputStyle, border: `1px solid ${borderColor}` }}
+            onFocus={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
+            }}
+            onBlur={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          />
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={setField("phone")}
+            placeholder="Phone"
+            data-testid="lead-phone-input"
+            className={inputClass}
+            style={{ ...inputStyle, border: `1px solid ${borderColor}` }}
+            onFocus={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
+            }}
+            onBlur={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          />
+          <input
+            type="text"
+            value={form.restaurant}
+            onChange={setField("restaurant")}
+            placeholder="Restaurant name"
+            data-testid="lead-restaurant-input"
+            className={inputClass}
+            style={{ ...inputStyle, border: `1px solid ${borderColor}` }}
+            onFocus={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
+            }}
+            onBlur={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          />
+          <input
+            type="number" min="1"
+            value={form.locations}
+            onChange={setField("locations")}
+            placeholder="Number of locations"
+            data-testid="lead-locations-input"
+            className={`sm:col-span-2 ${inputClass}`}
+            style={{ ...inputStyle, border: `1px solid ${borderColor}` }}
+            onFocus={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "#E8500A";
+            }}
+            onBlur={(e) => {
+              if (status === "idle") e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            }}
+          />
           <button
             type="submit"
             disabled={status === "loading"}
             data-testid="lead-submit-btn"
-            className="h-[56px] inline-flex items-center justify-center gap-2 rounded-full px-8 font-semibold whitespace-nowrap"
+            className="sm:col-span-2 h-[56px] inline-flex items-center justify-center gap-2 rounded-full px-8 font-semibold whitespace-nowrap"
             style={{
               background: "#E8500A",
               color: "#fff",
