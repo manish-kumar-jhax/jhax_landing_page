@@ -139,26 +139,6 @@ async def create_demo_request(payload: DemoRequestCreate):
     return {"id": req_id, "status": "new"}
 
 
-@api_router.get("/leads", response_model=List[Lead])
-async def list_leads():
-    async with async_session() as session:
-        rows = (
-            await session.execute(select(LeadORM).order_by(LeadORM.created_at.desc()))
-        ).scalars().all()
-    return [
-        Lead(
-            id=r.id,
-            email=r.email,
-            source=r.source,
-            business_name=r.business_name,
-            person_name=r.person_name,
-            phone=r.phone,
-            created_at=r.created_at,
-        )
-        for r in rows
-    ]
-
-
 # ---------- Free Audit (Google Places) ----------
 class AuditRequest(BaseModel):
     name: str
